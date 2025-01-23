@@ -1,14 +1,24 @@
-import { Client, LocalAuth } from "whatsapp-web.js";
+import {
+  Client,
+  type ClientOptions,
+  LocalAuth,
+  WAState,
+} from "whatsapp-web.js";
 import * as fs from "fs";
 import * as path from "path";
 
-const sessions: Map<string, WAWebJS.Client> = new Map();
+// Create interface that add qr to Client type
+export interface ClientWithQR extends Client {
+  qr?: string;
+}
+
+const sessions: Map<string, ClientWithQR> = new Map();
 
 import config from "./config";
 const {
   baseWebhookURL,
   sessionFolderPath,
-  maxAttachmentSize,
+  // maxAttachmentSize,
   setMessagesAsSeen,
   webVersion,
   webVersionCacheType,
@@ -20,12 +30,11 @@ import {
   waitForNestedObject,
   checkIfEventisEnabled,
 } from "./utils";
-import WAWebJS = require("whatsapp-web.js");
 
 // Session Validation Types
 type SessionValidation = {
   success: boolean;
-  state: WAWebJS.WAState | null;
+  state: WAState | null;
   message: string;
 };
 
@@ -43,7 +52,7 @@ const validateSession = async (
       };
     }
 
-    const client = sessions.get(sessionId) as WAWebJS.Client;
+    const client = sessions.get(sessionId) as Client;
     // wait until the client is created
     await waitForNestedObject(client, "pupPage").catch((err) => {
       return { success: false, state: null, message: err.message };
@@ -136,9 +145,9 @@ const setupSession = (sessionId: string) => {
     // delete localAuth.logout;
     // localAuth.logout = () => {};
 
-    const clientOptions: WAWebJS.ClientOptions = {
+    const clientOptions: ClientOptions = {
       puppeteer: {
-        executablePath: process.env.CHROME_BIN || undefined,
+        executablePath: process.env["CHROME_BIN"] || undefined,
         // headless: false,
         args: [
           "--no-sandbox",
@@ -154,7 +163,7 @@ const setupSession = (sessionId: string) => {
 
     if (webVersion) {
       clientOptions.webVersion = webVersion;
-      switch (webVersionCacheType.toLowerCase()) {
+      switch (webVersionCacheType?.toLowerCase()) {
         case "local":
           clientOptions.webVersionCache = {
             type: "local",
@@ -192,7 +201,7 @@ const setupSession = (sessionId: string) => {
   }
 };
 
-const initializeEvents = (client: WAWebJS.Client, sessionId: string) => {
+const initializeEvents = (client: Client, sessionId: string) => {
   // check if the session webhook is overridden
   const sessionWebhook =
     process.env[sessionId.toUpperCase() + "_WEBHOOK_URL"] || baseWebhookURL;
@@ -202,7 +211,7 @@ const initializeEvents = (client: WAWebJS.Client, sessionId: string) => {
       .then(() => {
         const restartSession = async (sessionId: string) => {
           sessions.delete(sessionId);
-          await client.destroy().catch((e) => {});
+          await client.destroy().catch(() => {});
           setupSession(sessionId);
         };
         client.pupPage?.once("close", function () {
@@ -218,46 +227,46 @@ const initializeEvents = (client: WAWebJS.Client, sessionId: string) => {
           restartSession(sessionId);
         });
       })
-      .catch((e) => {});
+      .catch(() => {});
   }
 
-  checkIfEventisEnabled("auth_failure").then((_) => {
+  checkIfEventisEnabled("auth_failure").then(() => {
     client.on("auth_failure", (msg) => {
       triggerWebhook(sessionWebhook, sessionId, "status", { msg });
     });
   });
 
-  checkIfEventisEnabled("authenticated").then((_) => {
+  checkIfEventisEnabled("authenticated").then(() => {
     client.on("authenticated", () => {
       triggerWebhook(sessionWebhook, sessionId, "authenticated");
     });
   });
 
-  checkIfEventisEnabled("call").then((_) => {
+  checkIfEventisEnabled("call").then(() => {
     client.on("call", async (call) => {
       triggerWebhook(sessionWebhook, sessionId, "call", { call });
     });
   });
 
-  checkIfEventisEnabled("change_state").then((_) => {
+  checkIfEventisEnabled("change_state").then(() => {
     client.on("change_state", (state) => {
       triggerWebhook(sessionWebhook, sessionId, "change_state", { state });
     });
   });
 
-  checkIfEventisEnabled("disconnected").then((_) => {
+  checkIfEventisEnabled("disconnected").then(() => {
     client.on("disconnected", (reason) => {
       triggerWebhook(sessionWebhook, sessionId, "disconnected", { reason });
     });
   });
 
-  checkIfEventisEnabled("group_join").then((_) => {
+  checkIfEventisEnabled("group_join").then(() => {
     client.on("group_join", (notification) => {
       triggerWebhook(sessionWebhook, sessionId, "group_join", { notification });
     });
   });
 
-  checkIfEventisEnabled("group_leave").then((_) => {
+  checkIfEventisEnabled("group_leave").then(() => {
     client.on("group_leave", (notification) => {
       triggerWebhook(sessionWebhook, sessionId, "group_leave", {
         notification,
@@ -265,7 +274,7 @@ const initializeEvents = (client: WAWebJS.Client, sessionId: string) => {
     });
   });
 
-  checkIfEventisEnabled("group_update").then((_) => {
+  checkIfEventisEnabled("group_update").then(() => {
     client.on("group_update", (notification) => {
       triggerWebhook(sessionWebhook, sessionId, "group_update", {
         notification,
@@ -273,7 +282,7 @@ const initializeEvents = (client: WAWebJS.Client, sessionId: string) => {
     });
   });
 
-  checkIfEventisEnabled("loading_screen").then((_) => {
+  checkIfEventisEnabled("loading_screen").then(() => {
     client.on("loading_screen", (percent, message) => {
       triggerWebhook(sessionWebhook, sessionId, "loading_screen", {
         percent,
@@ -282,18 +291,18 @@ const initializeEvents = (client: WAWebJS.Client, sessionId: string) => {
     });
   });
 
-  checkIfEventisEnabled("media_uploaded").then((_) => {
+  checkIfEventisEnabled("media_uploaded").then(() => {
     client.on("media_uploaded", (message) => {
       triggerWebhook(sessionWebhook, sessionId, "media_uploaded", { message });
     });
   });
 
-  checkIfEventisEnabled("message").then((_) => {
+  checkIfEventisEnabled("message").then(() => {
     client.on("message", async (message) => {
       triggerWebhook(sessionWebhook, sessionId, "message", { message });
       if (message.hasMedia) {
         // custom service event
-        checkIfEventisEnabled("media").then((_) => {
+        checkIfEventisEnabled("media").then(() => {
           message
             .downloadMedia()
             .then((messageMedia) => {
@@ -314,7 +323,7 @@ const initializeEvents = (client: WAWebJS.Client, sessionId: string) => {
     });
   });
 
-  checkIfEventisEnabled("message_ack").then((_) => {
+  checkIfEventisEnabled("message_ack").then(() => {
     client.on("message_ack", async (message, ack) => {
       triggerWebhook(sessionWebhook, sessionId, "message_ack", {
         message,
@@ -327,7 +336,7 @@ const initializeEvents = (client: WAWebJS.Client, sessionId: string) => {
     });
   });
 
-  checkIfEventisEnabled("message_create").then((_) => {
+  checkIfEventisEnabled("message_create").then(() => {
     client.on("message_create", async (message) => {
       triggerWebhook(sessionWebhook, sessionId, "message_create", { message });
       if (setMessagesAsSeen) {
@@ -337,7 +346,7 @@ const initializeEvents = (client: WAWebJS.Client, sessionId: string) => {
     });
   });
 
-  checkIfEventisEnabled("message_reaction").then((_) => {
+  checkIfEventisEnabled("message_reaction").then(() => {
     client.on("message_reaction", (reaction) => {
       triggerWebhook(sessionWebhook, sessionId, "message_reaction", {
         reaction,
@@ -345,7 +354,7 @@ const initializeEvents = (client: WAWebJS.Client, sessionId: string) => {
     });
   });
 
-  checkIfEventisEnabled("message_edit").then((_) => {
+  checkIfEventisEnabled("message_edit").then(() => {
     client.on("message_edit", (message, newBody, prevBody) => {
       triggerWebhook(sessionWebhook, sessionId, "message_edit", {
         message,
@@ -355,7 +364,7 @@ const initializeEvents = (client: WAWebJS.Client, sessionId: string) => {
     });
   });
 
-  checkIfEventisEnabled("message_ciphertext").then((_) => {
+  checkIfEventisEnabled("message_ciphertext").then(() => {
     client.on("message_ciphertext", (message) => {
       triggerWebhook(sessionWebhook, sessionId, "message_ciphertext", {
         message,
@@ -363,17 +372,15 @@ const initializeEvents = (client: WAWebJS.Client, sessionId: string) => {
     });
   });
 
-  checkIfEventisEnabled("message_revoke_everyone").then((_) => {
-    // eslint-disable-next-line camelcase
+  checkIfEventisEnabled("message_revoke_everyone").then(() => {
     client.on("message_revoke_everyone", async (message) => {
-      // eslint-disable-next-line camelcase
       triggerWebhook(sessionWebhook, sessionId, "message_revoke_everyone", {
         message,
       });
     });
   });
 
-  checkIfEventisEnabled("message_revoke_me").then((_) => {
+  checkIfEventisEnabled("message_revoke_me").then(() => {
     client.on("message_revoke_me", async (message) => {
       triggerWebhook(sessionWebhook, sessionId, "message_revoke_me", {
         message,
@@ -384,18 +391,18 @@ const initializeEvents = (client: WAWebJS.Client, sessionId: string) => {
   client.on("qr", (qr) => {
     // inject qr code into session
     // client.qr = qr;
-    checkIfEventisEnabled("qr").then((_) => {
+    checkIfEventisEnabled("qr").then(() => {
       triggerWebhook(sessionWebhook, sessionId, "qr", { qr });
     });
   });
 
-  checkIfEventisEnabled("ready").then((_) => {
+  checkIfEventisEnabled("ready").then(() => {
     client.on("ready", () => {
       triggerWebhook(sessionWebhook, sessionId, "ready");
     });
   });
 
-  checkIfEventisEnabled("contact_changed").then((_) => {
+  checkIfEventisEnabled("contact_changed").then(() => {
     client.on("contact_changed", async (message, oldId, newId, isContact) => {
       triggerWebhook(sessionWebhook, sessionId, "contact_changed", {
         message,
@@ -406,13 +413,13 @@ const initializeEvents = (client: WAWebJS.Client, sessionId: string) => {
     });
   });
 
-  checkIfEventisEnabled("chat_removed").then((_) => {
+  checkIfEventisEnabled("chat_removed").then(() => {
     client.on("chat_removed", async (chat) => {
       triggerWebhook(sessionWebhook, sessionId, "chat_removed", { chat });
     });
   });
 
-  checkIfEventisEnabled("chat_archived").then((_) => {
+  checkIfEventisEnabled("chat_archived").then(() => {
     client.on("chat_archived", async (chat, currState, prevState) => {
       triggerWebhook(sessionWebhook, sessionId, "chat_archived", {
         chat,
@@ -422,7 +429,7 @@ const initializeEvents = (client: WAWebJS.Client, sessionId: string) => {
     });
   });
 
-  checkIfEventisEnabled("unread_count").then((_) => {
+  checkIfEventisEnabled("unread_count").then(() => {
     client.on("unread_count", async (chat) => {
       triggerWebhook(sessionWebhook, sessionId, "unread_count", { chat });
     });
@@ -471,7 +478,7 @@ const reloadSession = async (sessionId: string) => {
           new Promise((resolve) => setTimeout(resolve, 5000)),
         ]);
       }
-    } catch (e) {
+    } catch {
       const childProcess = client.pupBrowser?.process();
       if (childProcess) {
         childProcess.kill(9);

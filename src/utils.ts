@@ -1,7 +1,7 @@
 import axios from "axios";
 import config from "./config";
-import { Context } from "hono";
-import { StatusCode } from "hono/utils/http-status";
+import type { Context } from "hono";
+import type { StatusCode } from "hono/utils/http-status";
 
 const { globalApiKey, disabledCallbacks } = config;
 
@@ -17,7 +17,6 @@ export const triggerWebhook = (
   webhookURL: string,
   sessionId: string,
   dataType: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data?: any
 ) => {
   axios
@@ -56,7 +55,6 @@ export const sendErrorResponse = (
  * @returns A promise that resolves when the nested object is no longer null
  */
 export const waitForNestedObject = (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   rootObj: any,
   nestedPath: string,
   maxWaitTime: number = 10000,

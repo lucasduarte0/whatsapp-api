@@ -1,24 +1,28 @@
-const qr = require('qr-image')
-const { setupSession, deleteSession, reloadSession, validateSession, flushSessions, sessions } = require('../sessions')
-const { sendErrorResponse, waitForNestedObject } = require('../utils')
+// import * as qr from "qr-image";
+import {
+  setupSession,
+  deleteSession,
+  reloadSession,
+  validateSession,
+  flushSessions,
+  sessions,
+} from "../sessions";
+import { sendErrorResponse, waitForNestedObject } from "../utils";
+import type { Context } from "hono";
 
 /**
  * Starts a session for the given session ID.
  *
- * @function
- * @async
- * @param {Object} req - The HTTP request object.
- * @param {Object} res - The HTTP response object.
- * @param {string} req.params.sessionId - The session ID to start.
- * @returns {Promise<void>}
- * @throws {Error} If there was an error starting the session.
+ * @param c - The Hono context object
+ * @returns Promise resolving to void
+ * @throws Error If there was an error starting the session
  */
-const startSession = async (req, res) => {
+const startSession = async (c: Context) => {
   // #swagger.summary = 'Start new session'
   // #swagger.description = 'Starts a session for the given session ID.'
   try {
-    const sessionId = req.params.sessionId
-    const setupSessionReturn = setupSession(sessionId)
+    const sessionId = c.req.param("sessionId");
+    const setupSessionReturn = setupSession(sessionId);
     if (!setupSessionReturn.success) {
       /* #swagger.responses[422] = {
         description: "Unprocessable Entity.",
@@ -29,8 +33,8 @@ const startSession = async (req, res) => {
         }
       }
       */
-      sendErrorResponse(res, 422, setupSessionReturn.message)
-      return
+      sendErrorResponse(c, 422, setupSessionReturn.message);
+      return;
     }
     /* #swagger.responses[200] = {
       description: "Status of the initiated session.",
@@ -42,11 +46,16 @@ const startSession = async (req, res) => {
     }
     */
     // wait until the client is created
-    waitForNestedObject(setupSessionReturn.client, 'pupPage')
-      .then(res.json({ success: true, message: setupSessionReturn.message }))
-      .catch((err) => { sendErrorResponse(res, 500, err.message) })
-  } catch (error) {
-  /* #swagger.responses[500] = {
+    // wait until the client is created
+    waitForNestedObject(setupSessionReturn.client, "pupPage")
+      .then(() => {
+        return c.json({ success: true, message: setupSessionReturn.message });
+      })
+      .catch((err) => {
+        sendErrorResponse(c, 500, err.message);
+      });
+  } catch (error: any) {
+    /* #swagger.responses[500] = {
       description: "Server Failure.",
       content: {
         "application/json": {
@@ -55,28 +64,24 @@ const startSession = async (req, res) => {
       }
     }
     */
-    console.log('startSession ERROR', error)
-    sendErrorResponse(res, 500, error.message)
+    console.log("startSession ERROR", error);
+    sendErrorResponse(c, 500, error.message);
   }
-}
+};
 
 /**
  * Status of the session with the given session ID.
  *
- * @function
- * @async
- * @param {Object} req - The HTTP request object.
- * @param {Object} res - The HTTP response object.
- * @param {string} req.params.sessionId - The session ID to start.
- * @returns {Promise<void>}
- * @throws {Error} If there was an error getting status of the session.
+ * @param c - The Hono context object
+ * @returns Promise resolving to void
+ * @throws Error If there was an error getting status of the session
  */
-const statusSession = async (req, res) => {
+const statusSession = async (c: Context) => {
   // #swagger.summary = 'Get session status'
   // #swagger.description = 'Status of the session with the given session ID.'
   try {
-    const sessionId = req.params.sessionId
-    const sessionData = await validateSession(sessionId)
+    const sessionId = c.req.param("sessionId");
+    const sessionData = await validateSession(sessionId);
     /* #swagger.responses[200] = {
       description: "Status of the session.",
       content: {
@@ -86,9 +91,9 @@ const statusSession = async (req, res) => {
       }
     }
     */
-    res.json(sessionData)
-  } catch (error) {
-    console.log('statusSession ERROR', error)
+    c.json(sessionData);
+  } catch (error: any) {
+    console.log("statusSession ERROR", error);
     /* #swagger.responses[500] = {
       description: "Server Failure.",
       content: {
@@ -98,36 +103,35 @@ const statusSession = async (req, res) => {
       }
     }
     */
-    sendErrorResponse(res, 500, error.message)
+    sendErrorResponse(c, 500, error.message);
   }
-}
+};
 
 /**
  * QR code of the session with the given session ID.
  *
- * @function
- * @async
- * @param {Object} req - The HTTP request object.
- * @param {Object} res - The HTTP response object.
- * @param {string} req.params.sessionId - The session ID to start.
- * @returns {Promise<void>}
- * @throws {Error} If there was an error getting status of the session.
+ * @param c - The Hono context object
+ * @returns Promise resolving to void
+ * @throws Error If there was an error getting status of the session
  */
-const sessionQrCode = async (req, res) => {
+const sessionQrCode = async (c: Context) => {
   // #swagger.summary = 'Get session QR code'
   // #swagger.description = 'QR code of the session with the given session ID.'
   try {
-    const sessionId = req.params.sessionId
-    const session = sessions.get(sessionId)
+    const sessionId = c.req.param("sessionId");
+    const session = sessions.get(sessionId);
     if (!session) {
-      return res.json({ success: false, message: 'session_not_found' })
+      return c.json({ success: false, message: "session_not_found" });
     }
     if (session.qr) {
-      return res.json({ success: true, qr: session.qr })
+      return c.json({ success: true, qr: session.qr });
     }
-    return res.json({ success: false, message: 'qr code not ready or already scanned' })
-  } catch (error) {
-    console.log('sessionQrCode ERROR', error)
+    return c.json({
+      success: false,
+      message: "qr code not ready or already scanned",
+    });
+  } catch (error: any) {
+    console.log("sessionQrCode ERROR", error);
     /* #swagger.responses[500] = {
       description: "Server Failure.",
       content: {
@@ -137,81 +141,80 @@ const sessionQrCode = async (req, res) => {
       }
     }
     */
-    sendErrorResponse(res, 500, error.message)
+    sendErrorResponse(c, 500, error.message);
   }
-}
+};
 
-/**
- * QR code as image of the session with the given session ID.
- *
- * @function
- * @async
- * @param {Object} req - The HTTP request object.
- * @param {Object} res - The HTTP response object.
- * @param {string} req.params.sessionId - The session ID to start.
- * @returns {Promise<void>}
- * @throws {Error} If there was an error getting status of the session.
- */
-const sessionQrCodeImage = async (req, res) => {
-  // #swagger.summary = 'Get session QR code as image'
-  // #swagger.description = 'QR code as image of the session with the given session ID.'
-  try {
-    const sessionId = req.params.sessionId
-    const session = sessions.get(sessionId)
-    if (!session) {
-      return res.json({ success: false, message: 'session_not_found' })
-    }
-    if (session.qr) {
-      const qrImage = qr.image(session.qr)
-      /* #swagger.responses[200] = {
-          description: "QR image.",
-          content: {
-            "image/png": {}
-          }
-        }
-      */
-      res.writeHead(200, {
-        'Content-Type': 'image/png'
-      })
-      return qrImage.pipe(res)
-    }
-    return res.json({ success: false, message: 'qr code not ready or already scanned' })
-  } catch (error) {
-    console.log('sessionQrCodeImage ERROR', error)
-    /* #swagger.responses[500] = {
-      description: "Server Failure.",
-      content: {
-        "application/json": {
-          schema: { "$ref": "#/definitions/ErrorResponse" }
-        }
-      }
-    }
-    */
-    sendErrorResponse(res, 500, error.message)
-  }
-}
+// /**
+//  * QR code as image of the session with the given session ID.
+//  *
+//  * @param c - The Hono context object
+//  * @returns Promise resolving to void
+//  * @throws Error If there was an error getting status of the session
+//  */
+// const sessionQrCodeImage = async (c: Context) => {
+//   try {
+//     const sessionId = c.req.param("sessionId");
+//     const session = sessions.get(sessionId);
+
+//     if (!session) {
+//       return c.json({ success: false, message: "session_not_found" }, 404);
+//     }
+
+//     if (session.qr) {
+//       // Generate QR image buffer
+//       const qrBuffer = await new Promise((resolve, reject) => {
+//         qr.image(session.qr, (err: Error, buffer: Buffer) => {
+//           if (err) reject(err);
+//           resolve(buffer);
+//         });
+//       });
+
+//       // Return the image with proper headers
+//       return new Response(qrBuffer, {
+//         headers: {
+//           "Content-Type": "image/png",
+//         },
+//         status: 200,
+//       });
+//     }
+
+//     return c.json(
+//       {
+//         success: false,
+//         message: "qr code not ready or already scanned",
+//       },
+//       400
+//     );
+//   } catch (error: any) {
+//     console.log("sessionQrCodeImage ERROR", error);
+//     return c.json(
+//       {
+//         success: false,
+//         message: error.message,
+//       },
+//       500
+//     );
+//   }
+// };
 
 /**
  * Restarts the session with the given session ID.
  *
- * @function
- * @async
- * @param {Object} req - The HTTP request object.
- * @param {Object} res - The HTTP response object.
- * @param {string} req.params.sessionId - The session ID to terminate.
- * @returns {Promise<void>}
- * @throws {Error} If there was an error terminating the session.
+ * @param c - The Hono context object
+ * @returns Promise resolving to void
+ * @throws Error If there was an error terminating the session
  */
-const restartSession = async (req, res) => {
+const restartSession = async (c: Context) => {
   // #swagger.summary = 'Restart session'
   // #swagger.description = 'Restarts the session with the given session ID.'
   try {
-    const sessionId = req.params.sessionId
-    const validation = await validateSession(sessionId)
-    if (validation.message === 'session_not_found') {
-      return res.json(validation)
+    const sessionId = c.req.param("sessionId");
+    const validation = await validateSession(sessionId);
+    if (validation.message === "session_not_found") {
+      return c.json(validation);
     }
-    await reloadSession(sessionId)
+    await reloadSession(sessionId);
     /* #swagger.responses[200] = {
       description: "Sessions restarted.",
       content: {
@@ -221,8 +224,8 @@ const restartSession = async (req, res) => {
       }
     }
     */
-    res.json({ success: true, message: 'Restarted successfully' })
-  } catch (error) {
+    c.json({ success: true, message: "Restarted successfully" });
+  } catch (error: any) {
     /* #swagger.responses[500] = {
       description: "Server Failure.",
       content: {
@@ -232,32 +235,28 @@ const restartSession = async (req, res) => {
       }
     }
     */
-    console.log('restartSession ERROR', error)
-    sendErrorResponse(res, 500, error.message)
+    console.log("restartSession ERROR", error);
+    sendErrorResponse(c, 500, error.message);
   }
-}
+};
 
 /**
  * Terminates the session with the given session ID.
  *
- * @function
- * @async
- * @param {Object} req - The HTTP request object.
- * @param {Object} res - The HTTP response object.
- * @param {string} req.params.sessionId - The session ID to terminate.
- * @returns {Promise<void>}
- * @throws {Error} If there was an error terminating the session.
+ * @param c - The Hono context object
+ * @returns Promise resolving to void
+ * @throws Error If there was an error terminating the session
  */
-const terminateSession = async (req, res) => {
+const terminateSession = async (c: Context) => {
   // #swagger.summary = 'Terminate session'
   // #swagger.description = 'Terminates the session with the given session ID.'
   try {
-    const sessionId = req.params.sessionId
-    const validation = await validateSession(sessionId)
-    if (validation.message === 'session_not_found') {
-      return res.json(validation)
+    const sessionId = c.req.param("sessionId");
+    const validation = await validateSession(sessionId);
+    if (validation.message === "session_not_found") {
+      return c.json(validation);
     }
-    await deleteSession(sessionId, validation)
+    await deleteSession(sessionId, validation);
     /* #swagger.responses[200] = {
       description: "Sessions terminated.",
       content: {
@@ -267,8 +266,8 @@ const terminateSession = async (req, res) => {
       }
     }
     */
-    res.json({ success: true, message: 'Logged out successfully' })
-  } catch (error) {
+    c.json({ success: true, message: "Logged out successfully" });
+  } catch (error: any) {
     /* #swagger.responses[500] = {
       description: "Server Failure.",
       content: {
@@ -278,26 +277,23 @@ const terminateSession = async (req, res) => {
       }
     }
     */
-    console.log('terminateSession ERROR', error)
-    sendErrorResponse(res, 500, error.message)
+    console.log("terminateSession ERROR", error);
+    sendErrorResponse(c, 500, error.message);
   }
-}
+};
 
 /**
  * Terminates all inactive sessions.
  *
- * @function
- * @async
- * @param {Object} req - The HTTP request object.
- * @param {Object} res - The HTTP response object.
- * @returns {Promise<void>}
- * @throws {Error} If there was an error terminating the sessions.
+ * @param c - The Hono context object
+ * @returns Promise resolving to void
+ * @throws Error If there was an error terminating the sessions
  */
-const terminateInactiveSessions = async (req, res) => {
+const terminateInactiveSessions = async (c: Context) => {
   // #swagger.summary = 'Terminate inactive sessions'
   // #swagger.description = 'Terminates all inactive sessions.'
   try {
-    await flushSessions(true)
+    await flushSessions(true);
     /* #swagger.responses[200] = {
       description: "Sessions terminated.",
       content: {
@@ -307,8 +303,8 @@ const terminateInactiveSessions = async (req, res) => {
       }
     }
     */
-    res.json({ success: true, message: 'Flush completed successfully' })
-  } catch (error) {
+    c.json({ success: true, message: "Flush completed successfully" });
+  } catch (error: any) {
     /* #swagger.responses[500] = {
       description: "Server Failure.",
       content: {
@@ -318,26 +314,23 @@ const terminateInactiveSessions = async (req, res) => {
       }
     }
     */
-    console.log('terminateInactiveSessions ERROR', error)
-    sendErrorResponse(res, 500, error.message)
+    console.log("terminateInactiveSessions ERROR", error);
+    sendErrorResponse(c, 500, error.message);
   }
-}
+};
 
 /**
  * Terminates all sessions.
  *
- * @function
- * @async
- * @param {Object} req - The HTTP request object.
- * @param {Object} res - The HTTP response object.
- * @returns {Promise<void>}
- * @throws {Error} If there was an error terminating the sessions.
+ * @param c - The Hono context object
+ * @returns Promise resolving to void
+ * @throws Error If there was an error terminating the sessions
  */
-const terminateAllSessions = async (req, res) => {
+const terminateAllSessions = async (c: Context) => {
   // #swagger.summary = 'Terminate all sessions'
   // #swagger.description = 'Terminates all sessions.'
   try {
-    await flushSessions(false)
+    await flushSessions(false);
     /* #swagger.responses[200] = {
       description: "Sessions terminated.",
       content: {
@@ -347,9 +340,9 @@ const terminateAllSessions = async (req, res) => {
       }
     }
     */
-    res.json({ success: true, message: 'Flush completed successfully' })
-  } catch (error) {
-  /* #swagger.responses[500] = {
+    c.json({ success: true, message: "Flush completed successfully" });
+  } catch (error: any) {
+    /* #swagger.responses[500] = {
       description: "Server Failure.",
       content: {
         "application/json": {
@@ -358,18 +351,18 @@ const terminateAllSessions = async (req, res) => {
       }
     }
     */
-    console.log('terminateAllSessions ERROR', error)
-    sendErrorResponse(res, 500, error.message)
+    console.log("terminateAllSessions ERROR", error);
+    sendErrorResponse(c, 500, error.message);
   }
-}
+};
 
-module.exports = {
+export {
   startSession,
   statusSession,
   sessionQrCode,
-  sessionQrCodeImage,
+  // sessionQrCodeImage,
   restartSession,
   terminateSession,
   terminateInactiveSessions,
-  terminateAllSessions
-}
+  terminateAllSessions,
+};

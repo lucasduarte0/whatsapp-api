@@ -22,7 +22,7 @@ app.notFound((c) => {
   return c.text("Custom 404 Message", 404);
 });
 // Use routes middleware
-app.use("/", routes);
+app.route("/", routes);
 
 restoreSessions();
 

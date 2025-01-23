@@ -1,9 +1,14 @@
 import config from "./config";
 import { sendErrorResponse } from "./utils";
 import { validateSession } from "./sessions";
-import { Next, Context } from "hono";
+import { type Next, type Context } from "hono";
+// import { RateLimiterMemory } from "hono/rate-limiter";
 
-const { globalApiKey, rateLimitMax, rateLimitWindowMs } = config;
+const {
+  globalApiKey,
+  // rateLimitMax,
+  // rateLimitWindowMs
+} = config;
 
 const apikey = async (c: Context, next: Next) => {
   /*
@@ -23,10 +28,10 @@ const apikey = async (c: Context, next: Next) => {
   if (globalApiKey) {
     const apiKey = c.req.header("x-api-key");
     if (!apiKey || apiKey !== globalApiKey) {
-      return sendErrorResponse(res, 403, "Invalid API key");
+      return sendErrorResponse(c, 403, "Invalid API key");
     }
   }
-  next();
+  await next();
 };
 
 const sessionNameValidation = async (c: Context, next: Next) => {
@@ -39,7 +44,7 @@ const sessionNameValidation = async (c: Context, next: Next) => {
       example: 'f8377d8d-a589-4242-9ba6-9486a04ef80c'
     }
   */
-  if (!/^[\w-]+$/.test(req.params.sessionId)) {
+  if (!/^[\w-]+$/.test(c.req.param("sessionId"))) {
     /* #swagger.responses[422] = {
         description: "Unprocessable Entity.",
         content: {
@@ -49,13 +54,13 @@ const sessionNameValidation = async (c: Context, next: Next) => {
         }
       }
     */
-    return sendErrorResponse(res, 422, "Session should be alphanumerical or -");
+    return sendErrorResponse(c, 422, "Session should be alphanumerical or -");
   }
-  next();
+  await next();
 };
 
 const sessionValidation = async (c: Context, next: Next) => {
-  const validation = await validateSession(req.params.sessionId);
+  const validation = await validateSession(c.req.param("sessionId"));
   if (validation.success !== true) {
     /* #swagger.responses[404] = {
         description: "Not Found.",
@@ -66,32 +71,26 @@ const sessionValidation = async (c: Context, next: Next) => {
         }
       }
     */
-    return sendErrorResponse(res, 404, validation.message);
+    return sendErrorResponse(c, 404, validation.message);
   }
-  next();
+  await next();
 };
 
-const rateLimiter = rateLimiting({
-  max: rateLimitMax,
-  windowMS: rateLimitWindowMs,
-  message: "You can't make any more requests at the moment. Try again later",
-});
-
-const sessionSwagger = async (c: Context, next: Next) => {
+const sessionSwagger = async (_c: Context, next: Next) => {
   /*
     #swagger.tags = ['Session']
   */
-  next();
+  await next();
 };
 
-const clientSwagger = async (c: Context, next: Next) => {
+const clientSwagger = async (_c: Context, next: Next) => {
   /*
     #swagger.tags = ['Client']
   */
-  next();
+  await next();
 };
 
-const contactSwagger = async (c: Context, next: Next) => {
+const contactSwagger = async (_c: Context, next: Next) => {
   /*
     #swagger.tags = ['Contact']
     #swagger.requestBody = {
@@ -108,10 +107,10 @@ const contactSwagger = async (c: Context, next: Next) => {
       }
     }
   */
-  next();
+  await next();
 };
 
-const messageSwagger = async (c: Context, next: Next) => {
+const messageSwagger = async (_c: Context, next: Next) => {
   /*
     #swagger.tags = ['Message']
     #swagger.requestBody = {
@@ -133,10 +132,10 @@ const messageSwagger = async (c: Context, next: Next) => {
       }
     }
   */
-  next();
+  await next();
 };
 
-const chatSwagger = async (c: Context, next: Next) => {
+const chatSwagger = async (_c: Context, next: Next) => {
   /*
     #swagger.tags = ['Chat']
     #swagger.requestBody = {
@@ -153,10 +152,10 @@ const chatSwagger = async (c: Context, next: Next) => {
       }
     }
   */
-  next();
+  await next();
 };
 
-const groupChatSwagger = async (c: Context, next: Next) => {
+const groupChatSwagger = async (_c: Context, next: Next) => {
   /*
     #swagger.tags = ['Group Chat']
     #swagger.requestBody = {
@@ -173,7 +172,7 @@ const groupChatSwagger = async (c: Context, next: Next) => {
       }
     }
   */
-  next();
+  await next();
 };
 
 const middleware = {
@@ -186,7 +185,6 @@ const middleware = {
   messageSwagger,
   chatSwagger,
   groupChatSwagger,
-  rateLimiter,
 };
 
 export default middleware;
