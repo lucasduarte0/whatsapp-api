@@ -2,6 +2,7 @@ import * as qrcode from "qrcode-terminal";
 import config from "../config";
 import { sendErrorResponse } from "../utils";
 import { type Context } from "hono"; // Import Hono's Context type
+import { promises as fsPromises } from "fs";
 
 const { sessionFolderPath } = config;
 
@@ -44,22 +45,41 @@ const localCallbackExample = async (c: Context) => {
   */
   try {
     const { dataType, data } = await c.req.json();
+
     if (dataType === "qr") {
       qrcode.generate(data.qr, { small: true });
     }
-    Bun.write(
-      `${sessionFolderPath}/message_log.txt`,
-      `${JSON.stringify(await c.req.json())}\r\n`
-    );
+
+    // Read the existing log file
+    const logFilePath = `${sessionFolderPath}/message_log.jsonc`;
+    let existingData = [];
+
+    try {
+      const fileContent = await fsPromises.readFile(logFilePath, "utf8");
+      const strippedContent = stripJsonComments(fileContent);
+      existingData = JSON.parse(strippedContent);
+    } catch (readError: any) {
+      console.error("Error reading log file:", readError.message);
+      console.error("Stack trace:", readError.stack);
+    }
+
+    // Append new entry
+    existingData.push(await c.req.json());
+
+    // Write updated data back to the log file
+    const jsonString = JSON.stringify(existingData, null, 2) + "\r\n";
+    Bun.write(logFilePath, jsonString);
+
     return c.json({ success: true });
   } catch (error: any) {
     console.log(error);
-    Bun.write(
-      `${sessionFolderPath}/message_log.txt`,
-      `(ERROR) ${JSON.stringify(error)}\r\n`
-    );
     return sendErrorResponse(c, 500, error.message);
   }
 };
+
+// Helper function to strip comments from JSONC
+function stripJsonComments(data: string): string {
+  return data.replace(/\/\/.*|\/\*[^]*?\*\//g, "").trim();
+}
 
 export { ping, localCallbackExample };

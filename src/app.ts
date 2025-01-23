@@ -2,10 +2,13 @@
 import routes from "./routes";
 import config from "./config";
 import { restoreSessions } from "./sessions";
+import connectDB from './db';
 import { bodyLimit } from "hono/body-limit";
 import { Hono } from "hono";
 
 const { maxAttachmentSize } = config;
+
+connectDB();
 
 // Initialize Express app
 const app = new Hono();
@@ -28,3 +31,4 @@ app.notFound((c) => {
 restoreSessions();
 
 export default app;
+

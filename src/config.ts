@@ -18,6 +18,8 @@ interface Config {
   rateLimitMax: number;
   rateLimitWindowMs: number;
   recoverSessions: boolean;
+  mongoUri: string;
+  mongoDbName: string;
 }
 
 const config: Config = {
@@ -29,11 +31,13 @@ const config: Config = {
   maxAttachmentSize: process.env["MAX_ATTACHMENT_SIZE"]
     ? parseInt(process.env["MAX_ATTACHMENT_SIZE"])
     : 10000000,
-  setMessagesAsSeen: process.env["SET_MESSAGES_AS_SEEN"]?.toLowerCase() === "true",
+  setMessagesAsSeen:
+    process.env["SET_MESSAGES_AS_SEEN"]?.toLowerCase() === "true",
   disabledCallbacks: process.env["DISABLED_CALLBACKS"]
     ? process.env["DISABLED_CALLBACKS"].split("|")
     : [],
-  enableSwaggerEndpoint: process.env["ENABLE_SWAGGER_ENDPOINT"]?.toLowerCase() === "true",
+  enableSwaggerEndpoint:
+    process.env["ENABLE_SWAGGER_ENDPOINT"]?.toLowerCase() === "true",
   webVersion: process.env["WEB_VERSION"],
   webVersionCacheType: process.env["WEB_VERSION_CACHE_TYPE"] || undefined,
   rateLimitMax: process.env["RATE_LIMIT_MAX"]
@@ -43,6 +47,8 @@ const config: Config = {
     ? parseInt(process.env["RATE_LIMIT_WINDOW_MS"])
     : 1000,
   recoverSessions: process.env["RECOVER_SESSIONS"] === "true",
+  mongoUri: process.env["MONGO_URI"] as string,
+  mongoDbName: process.env["MONGO_DB_NAME"] as string,
 };
 
 // Check if BASE_WEBHOOK_URL environment variable is available
