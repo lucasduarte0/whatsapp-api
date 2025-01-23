@@ -1,5 +1,4 @@
-import fs from "fs";
-import qrcode from "qrcode-terminal";
+import * as qrcode from "qrcode-terminal";
 import config from "../config";
 import { sendErrorResponse } from "../utils";
 import { type Context } from "hono"; // Import Hono's Context type
@@ -48,20 +47,16 @@ const localCallbackExample = async (c: Context) => {
     if (dataType === "qr") {
       qrcode.generate(data.qr, { small: true });
     }
-    fs.writeFile(
+    Bun.write(
       `${sessionFolderPath}/message_log.txt`,
-      `${JSON.stringify(await c.req.json())}\r\n`,
-      { flag: "a+" },
-      (_) => _
+      `${JSON.stringify(await c.req.json())}\r\n`
     );
     c.json({ success: true });
   } catch (error: any) {
     console.log(error);
-    fs.writeFile(
+    Bun.write(
       `${sessionFolderPath}/message_log.txt`,
-      `(ERROR) ${JSON.stringify(error)}\r\n`,
-      { flag: "a+" },
-      (_) => _
+      `(ERROR) ${JSON.stringify(error)}\r\n`
     );
     sendErrorResponse(c, 500, error.message);
   }
