@@ -4,8 +4,8 @@
   "description": "REST API wrapper for whatsapp-web.js",
   "main": "src/server.ts",
   "scripts": {
-    "start": "bun start src/index.ts",
-    "dev": "bun run src/index.ts --watch --hot",
+    "start": "bun start src/app.ts",
+    "dev": "bun run src/app.ts --watch --hot",
     "build": "tsc",
     "test": "jest --runInBand"
   },

@@ -31,7 +31,7 @@ const apikey = async (c: Context, next: Next) => {
       return sendErrorResponse(c, 403, "Invalid API key");
     }
   }
-  await next();
+  return await next();
 };
 
 const sessionNameValidation = async (c: Context, next: Next) => {
@@ -56,7 +56,7 @@ const sessionNameValidation = async (c: Context, next: Next) => {
     */
     return sendErrorResponse(c, 422, "Session should be alphanumerical or -");
   }
-  await next();
+  return await next();
 };
 
 const sessionValidation = async (c: Context, next: Next) => {
@@ -73,21 +73,21 @@ const sessionValidation = async (c: Context, next: Next) => {
     */
     return sendErrorResponse(c, 404, validation.message);
   }
-  await next();
+  return await next();
 };
 
 const sessionSwagger = async (_c: Context, next: Next) => {
   /*
     #swagger.tags = ['Session']
   */
-  await next();
+  return await next();
 };
 
 const clientSwagger = async (_c: Context, next: Next) => {
   /*
     #swagger.tags = ['Client']
   */
-  await next();
+  return await next();
 };
 
 const contactSwagger = async (_c: Context, next: Next) => {
@@ -107,7 +107,7 @@ const contactSwagger = async (_c: Context, next: Next) => {
       }
     }
   */
-  await next();
+  return await next();
 };
 
 const messageSwagger = async (_c: Context, next: Next) => {
@@ -132,7 +132,7 @@ const messageSwagger = async (_c: Context, next: Next) => {
       }
     }
   */
-  await next();
+  return await next();
 };
 
 const chatSwagger = async (_c: Context, next: Next) => {
@@ -152,7 +152,7 @@ const chatSwagger = async (_c: Context, next: Next) => {
       }
     }
   */
-  await next();
+  return await next();
 };
 
 const groupChatSwagger = async (_c: Context, next: Next) => {
@@ -172,7 +172,7 @@ const groupChatSwagger = async (_c: Context, next: Next) => {
       }
     }
   */
-  await next();
+  return await next();
 };
 
 const middleware = {

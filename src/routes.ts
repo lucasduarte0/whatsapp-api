@@ -44,7 +44,6 @@ if (enableLocalCallbackExample) {
 const sessionRouter = new Hono();
 sessionRouter.use(middleware.apikey);
 sessionRouter.use(middleware.sessionSwagger);
-routes.route("/session", sessionRouter);
 
 sessionRouter.get(
   "/start/:sessionId",
@@ -82,6 +81,8 @@ sessionRouter.get(
 );
 sessionRouter.get("/terminateAll", sessionController.terminateAllSessions);
 
+routes.route("/session", sessionRouter);
+
 /**
  * ================
  * CLIENT ENDPOINTS
@@ -91,7 +92,6 @@ sessionRouter.get("/terminateAll", sessionController.terminateAllSessions);
 const clientRouter = new Hono();
 clientRouter.use(middleware.apikey);
 sessionRouter.use(middleware.clientSwagger);
-routes.route("/client", clientRouter);
 
 clientRouter.get(
   "/getClassInfo/:sessionId",
@@ -269,6 +269,8 @@ clientRouter.get(
   clientController.getWWebVersion
 );
 
+routes.route("/client", clientRouter);
+
 /**
  * ================
  * CHAT ENDPOINTS
@@ -277,7 +279,6 @@ clientRouter.get(
 const chatRouter = new Hono();
 chatRouter.use(middleware.apikey);
 sessionRouter.use(middleware.chatSwagger);
-routes.route("/chat", chatRouter);
 
 chatRouter.post(
   "/getClassInfo/:sessionId",
@@ -320,6 +321,8 @@ chatRouter.post(
   chatController.sendStateTyping
 );
 
+routes.route("/chat", chatRouter);
+
 /**
  * ================
  * GROUP CHAT ENDPOINTS
@@ -328,7 +331,6 @@ chatRouter.post(
 const groupChatRouter = new Hono();
 groupChatRouter.use(middleware.apikey);
 sessionRouter.use(middleware.groupChatSwagger);
-routes.route("/groupChat", groupChatRouter);
 
 groupChatRouter.post(
   "/getClassInfo/:sessionId",
@@ -401,6 +403,8 @@ groupChatRouter.post(
   groupChatController.deletePicture
 );
 
+routes.route("/groupChat", groupChatRouter);
+
 /**
  * ================
  * MESSAGE ENDPOINTS
@@ -409,7 +413,6 @@ groupChatRouter.post(
 const messageRouter = new Hono();
 messageRouter.use(middleware.apikey);
 sessionRouter.use(middleware.messageSwagger);
-routes.route("/message", messageRouter);
 
 messageRouter.post(
   "/getClassInfo/:sessionId",
@@ -477,6 +480,8 @@ messageRouter.post(
   messageController.unstar
 );
 
+routes.route("/message", messageRouter);
+
 /**
  * ================
  * MESSAGE ENDPOINTS
@@ -485,7 +490,6 @@ messageRouter.post(
 const contactRouter = new Hono();
 contactRouter.use(middleware.apikey);
 sessionRouter.use(middleware.contactSwagger);
-routes.route("/contact", contactRouter);
 
 contactRouter.post(
   "/getClassInfo/:sessionId",
@@ -527,6 +531,8 @@ contactRouter.post(
   some(middleware.sessionNameValidation, middleware.sessionValidation),
   contactController.getProfilePicUrl
 );
+
+routes.route("/contact", contactRouter);
 /**
  * ================
  * SWAGGER ENDPOINTS

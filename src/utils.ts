@@ -59,9 +59,10 @@ export const waitForNestedObject = (
   nestedPath: string,
   maxWaitTime: number = 10000,
   interval: number = 100
-): Promise<void> => {
+) => {
+  console.log("Waiting for nested object:", nestedPath);
   const start = Date.now();
-  return new Promise((resolve, reject) => {
+  return new Promise<void>((resolve, reject) => {
     const checkObject = () => {
       const nestedObj = nestedPath
         .split(".")
@@ -88,12 +89,10 @@ export const waitForNestedObject = (
  * @param event The event to check
  * @returns A promise that resolves if the event is enabled, rejects if it is disabled
  */
-export const checkIfEventisEnabled = (event: string): Promise<void> => {
-  return new Promise((resolve, reject) => {
+export const checkIfEventisEnabled = (event: any) => {
+  return new Promise<void>((resolve) => {
     if (!disabledCallbacks.includes(event)) {
       resolve();
-    } else {
-      reject(new Error(`Event ${event} is disabled`));
     }
   });
 };

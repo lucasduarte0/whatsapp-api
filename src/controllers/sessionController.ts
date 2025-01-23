@@ -22,7 +22,9 @@ const startSession = async (c: Context) => {
   // #swagger.description = 'Starts a session for the given session ID.'
   try {
     const sessionId = c.req.param("sessionId");
+    console.log(`Starting session ${sessionId}`);
     const setupSessionReturn = setupSession(sessionId);
+    console.log(`Setup session return: ${setupSessionReturn.success}`);
     if (!setupSessionReturn.success) {
       /* #swagger.responses[422] = {
         description: "Unprocessable Entity.",
@@ -33,8 +35,7 @@ const startSession = async (c: Context) => {
         }
       }
       */
-      sendErrorResponse(c, 422, setupSessionReturn.message);
-      return;
+      return sendErrorResponse(c, 422, setupSessionReturn.message);
     }
     /* #swagger.responses[200] = {
       description: "Status of the initiated session.",
@@ -47,13 +48,13 @@ const startSession = async (c: Context) => {
     */
     // wait until the client is created
     // wait until the client is created
-    waitForNestedObject(setupSessionReturn.client, "pupPage")
-      .then(() => {
-        return c.json({ success: true, message: setupSessionReturn.message });
-      })
-      .catch((err) => {
-        sendErrorResponse(c, 500, err.message);
-      });
+    // TODO: FIX THIS
+    try {
+      await waitForNestedObject(setupSessionReturn.client, "pupPage");
+      return c.json({ success: true, message: setupSessionReturn.message });
+    } catch (error: any) {
+      return sendErrorResponse(c, 500, error.message);
+    }
   } catch (error: any) {
     /* #swagger.responses[500] = {
       description: "Server Failure.",
@@ -65,7 +66,7 @@ const startSession = async (c: Context) => {
     }
     */
     console.log("startSession ERROR", error);
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -91,7 +92,7 @@ const statusSession = async (c: Context) => {
       }
     }
     */
-    c.json(sessionData);
+    return c.json(sessionData);
   } catch (error: any) {
     console.log("statusSession ERROR", error);
     /* #swagger.responses[500] = {
@@ -103,7 +104,7 @@ const statusSession = async (c: Context) => {
       }
     }
     */
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -141,7 +142,7 @@ const sessionQrCode = async (c: Context) => {
       }
     }
     */
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -224,7 +225,7 @@ const restartSession = async (c: Context) => {
       }
     }
     */
-    c.json({ success: true, message: "Restarted successfully" });
+    return c.json({ success: true, message: "Restarted successfully" });
   } catch (error: any) {
     /* #swagger.responses[500] = {
       description: "Server Failure.",
@@ -236,7 +237,7 @@ const restartSession = async (c: Context) => {
     }
     */
     console.log("restartSession ERROR", error);
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -266,7 +267,7 @@ const terminateSession = async (c: Context) => {
       }
     }
     */
-    c.json({ success: true, message: "Logged out successfully" });
+    return c.json({ success: true, message: "Logged out successfully" });
   } catch (error: any) {
     /* #swagger.responses[500] = {
       description: "Server Failure.",
@@ -278,7 +279,7 @@ const terminateSession = async (c: Context) => {
     }
     */
     console.log("terminateSession ERROR", error);
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -303,7 +304,7 @@ const terminateInactiveSessions = async (c: Context) => {
       }
     }
     */
-    c.json({ success: true, message: "Flush completed successfully" });
+    return c.json({ success: true, message: "Flush completed successfully" });
   } catch (error: any) {
     /* #swagger.responses[500] = {
       description: "Server Failure.",
@@ -315,7 +316,7 @@ const terminateInactiveSessions = async (c: Context) => {
     }
     */
     console.log("terminateInactiveSessions ERROR", error);
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -340,7 +341,7 @@ const terminateAllSessions = async (c: Context) => {
       }
     }
     */
-    c.json({ success: true, message: "Flush completed successfully" });
+    return c.json({ success: true, message: "Flush completed successfully" });
   } catch (error: any) {
     /* #swagger.responses[500] = {
       description: "Server Failure.",
@@ -352,7 +353,7 @@ const terminateAllSessions = async (c: Context) => {
     }
     */
     console.log("terminateAllSessions ERROR", error);
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 

@@ -21,9 +21,9 @@ const addParticipants = async (c: Context) => {
       throw new Error("The chat is not a group");
     }
     await chat.addParticipants(contactIds);
-    c.json({ success: true, participants: chat.participants });
+    return c.json({ success: true, participants: chat.participants });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -45,9 +45,9 @@ const removeParticipants = async (c: Context) => {
       throw new Error("The chat is not a group");
     }
     await chat.removeParticipants(contactIds);
-    c.json({ success: true, participants: chat.participants });
+    return c.json({ success: true, participants: chat.participants });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -69,9 +69,9 @@ const promoteParticipants = async (c: Context) => {
       throw new Error("The chat is not a group");
     }
     await chat.promoteParticipants(contactIds);
-    c.json({ success: true, participants: chat.participants });
+    return c.json({ success: true, participants: chat.participants });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -93,9 +93,9 @@ const demoteParticipants = async (c: Context) => {
       throw new Error("The chat is not a group");
     }
     await chat.demoteParticipants(contactIds);
-    c.json({ success: true, participants: chat.participants });
+    return c.json({ success: true, participants: chat.participants });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -117,9 +117,9 @@ const getInviteCode = async (c: Context) => {
       throw new Error("The chat is not a group");
     }
     const inviteCode = await chat.getInviteCode();
-    c.json({ success: true, inviteCode });
+    return c.json({ success: true, inviteCode });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -141,9 +141,9 @@ const setSubject = async (c: Context) => {
       throw new Error("The chat is not a group");
     }
     const success = await chat.setSubject(subject);
-    c.json({ success, chat });
+    return c.json({ success, chat });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -165,9 +165,9 @@ const setDescription = async (c: Context) => {
       throw new Error("The chat is not a group");
     }
     const success = await chat.setDescription(description);
-    c.json({ success, chat });
+    return c.json({ success, chat });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -189,9 +189,9 @@ const leave = async (c: Context) => {
       throw new Error("The chat is not a group");
     }
     const outcome = await chat.leave();
-    c.json({ success: true, outcome });
+    return c.json({ success: true, outcome });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -214,9 +214,9 @@ const getClassInfo = async (c: Context) => {
     if (!chat.isGroup) {
       throw new Error("The chat is not a group");
     }
-    c.json({ success: true, chat });
+    return c.json({ success: true, chat });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -240,9 +240,9 @@ const revokeInvite = async (c: Context) => {
       throw new Error("The chat is not a group");
     }
     const newInviteCode = await chat.revokeInvite();
-    c.json({ success: true, newInviteCode });
+    return c.json({ success: true, newInviteCode });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -268,9 +268,9 @@ const setInfoAdminsOnly = async (c: Context) => {
       throw new Error("The chat is not a group");
     }
     const result = await chat.setInfoAdminsOnly(adminsOnly);
-    c.json({ success: true, result });
+    return c.json({ success: true, result });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -296,9 +296,9 @@ const setMessagesAdminsOnly = async (c: Context) => {
       throw new Error("The chat is not a group");
     }
     const result = await chat.setMessagesAdminsOnly(adminsOnly);
-    c.json({ success: true, result });
+    return c.json({ success: true, result });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -323,9 +323,9 @@ const setPicture = async (c: Context) => {
       throw new Error("The chat is not a group");
     }
     const result = await chat.setPicture(media);
-    c.json({ success: true, result });
+    return c.json({ success: true, result });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -347,9 +347,9 @@ const deletePicture = async (c: Context) => {
       throw new Error("The chat is not a group");
     }
     const result = await chat.deletePicture();
-    c.json({ success: true, result });
+    return c.json({ success: true, result });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 

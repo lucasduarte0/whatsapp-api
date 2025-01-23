@@ -18,11 +18,12 @@ app.use(
     },
   })
 );
+// Use routes middleware
+app.route("/", routes);
+
 app.notFound((c) => {
   return c.text("Custom 404 Message", 404);
 });
-// Use routes middleware
-app.route("/", routes);
 
 restoreSessions();
 

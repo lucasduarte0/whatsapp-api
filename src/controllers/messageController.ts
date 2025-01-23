@@ -30,7 +30,7 @@ const _getMessageById = async (
  * @param c - The context object.
  * @returns - A Promise that resolves with no value when the function completes.
  */
-const getClassInfo = async (c: Context): Promise<void> => {
+const getClassInfo = async (c: Context) => {
   try {
     const { messageId, chatId } = await c.req.json();
     const client = sessions.get(c.req.param("sessionId"))!;
@@ -39,9 +39,9 @@ const getClassInfo = async (c: Context): Promise<void> => {
     if (!message) {
       throw new Error("Message not Found");
     }
-    c.json({ success: true, message });
+    return c.json({ success: true, message });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -51,7 +51,7 @@ const getClassInfo = async (c: Context): Promise<void> => {
  * @param c - The context object.
  * @returns - A Promise that resolves with no value when the function completes.
  */
-const deleteMessage = async (c: Context): Promise<void> => {
+const deleteMessage = async (c: Context) => {
   try {
     const { messageId, chatId, everyone } = await c.req.json();
     const client = sessions.get(c.req.param("sessionId"))!;
@@ -62,9 +62,9 @@ const deleteMessage = async (c: Context): Promise<void> => {
     const result = await message.delete(
       everyone === "true" || everyone === "1"
     );
-    c.json({ success: true, result });
+    return c.json({ success: true, result });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -74,7 +74,7 @@ const deleteMessage = async (c: Context): Promise<void> => {
  * @param c - The context object.
  * @returns - A Promise that resolves with no value when the function completes.
  */
-const downloadMedia = async (c: Context): Promise<void> => {
+const downloadMedia = async (c: Context) => {
   try {
     const { messageId, chatId } = await c.req.json();
     const client = sessions.get(c.req.param("sessionId"))!;
@@ -83,9 +83,9 @@ const downloadMedia = async (c: Context): Promise<void> => {
       throw new Error("Message not Found");
     }
     const messageMedia = await message.downloadMedia();
-    c.json({ success: true, messageMedia });
+    return c.json({ success: true, messageMedia });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -95,7 +95,7 @@ const downloadMedia = async (c: Context): Promise<void> => {
  * @param c - The context object.
  * @returns - A Promise that resolves with no value when the function completes.
  */
-const forward = async (c: Context): Promise<void> => {
+const forward = async (c: Context) => {
   try {
     const { messageId, chatId, destinationChatId } = await c.req.json();
     const client = sessions.get(c.req.param("sessionId"))!;
@@ -104,9 +104,9 @@ const forward = async (c: Context): Promise<void> => {
       throw new Error("Message not Found");
     }
     const result = await message.forward(destinationChatId);
-    c.json({ success: true, result });
+    return c.json({ success: true, result });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -116,7 +116,7 @@ const forward = async (c: Context): Promise<void> => {
  * @param c - The context object.
  * @returns - A Promise that resolves with no value when the function completes.
  */
-const getInfo = async (c: Context): Promise<void> => {
+const getInfo = async (c: Context) => {
   try {
     const { messageId, chatId } = await c.req.json();
     const client = sessions.get(c.req.param("sessionId"))!;
@@ -125,9 +125,9 @@ const getInfo = async (c: Context): Promise<void> => {
       throw new Error("Message not Found");
     }
     const info = await message.getInfo();
-    c.json({ success: true, info });
+    return c.json({ success: true, info });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -137,7 +137,7 @@ const getInfo = async (c: Context): Promise<void> => {
  * @param c - The context object.
  * @returns - A Promise that resolves with no value when the function completes.
  */
-const getMentions = async (c: Context): Promise<void> => {
+const getMentions = async (c: Context) => {
   try {
     const { messageId, chatId } = await c.req.json();
     const client = sessions.get(c.req.param("sessionId"))!;
@@ -146,9 +146,9 @@ const getMentions = async (c: Context): Promise<void> => {
       throw new Error("Message not Found");
     }
     const contacts = await message.getMentions();
-    c.json({ success: true, contacts });
+    return c.json({ success: true, contacts });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -158,7 +158,7 @@ const getMentions = async (c: Context): Promise<void> => {
  * @param c - The context object.
  * @returns - A Promise that resolves with no value when the function completes.
  */
-const getOrder = async (c: Context): Promise<void> => {
+const getOrder = async (c: Context) => {
   try {
     const { messageId, chatId } = await c.req.json();
     const client = sessions.get(c.req.param("sessionId"))!;
@@ -167,9 +167,9 @@ const getOrder = async (c: Context): Promise<void> => {
       throw new Error("Message not Found");
     }
     const order = await message.getOrder();
-    c.json({ success: true, order });
+    return c.json({ success: true, order });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -179,7 +179,7 @@ const getOrder = async (c: Context): Promise<void> => {
  * @param c - The context object.
  * @returns - A Promise that resolves with no value when the function completes.
  */
-const getPayment = async (c: Context): Promise<void> => {
+const getPayment = async (c: Context) => {
   try {
     const { messageId, chatId } = await c.req.json();
     const client = sessions.get(c.req.param("sessionId"))!;
@@ -188,9 +188,9 @@ const getPayment = async (c: Context): Promise<void> => {
       throw new Error("Message not Found");
     }
     const payment = await message.getPayment();
-    c.json({ success: true, payment });
+    return c.json({ success: true, payment });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -200,7 +200,7 @@ const getPayment = async (c: Context): Promise<void> => {
  * @param c - The context object.
  * @returns - A Promise that resolves with no value when the function completes.
  */
-const getQuotedMessage = async (c: Context): Promise<void> => {
+const getQuotedMessage = async (c: Context) => {
   try {
     const { messageId, chatId } = await c.req.json();
     const client = sessions.get(c.req.param("sessionId"))!;
@@ -209,9 +209,9 @@ const getQuotedMessage = async (c: Context): Promise<void> => {
       throw new Error("Message not Found");
     }
     const quotedMessage = await message.getQuotedMessage();
-    c.json({ success: true, quotedMessage });
+    return c.json({ success: true, quotedMessage });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -221,7 +221,7 @@ const getQuotedMessage = async (c: Context): Promise<void> => {
  * @param c - The context object.
  * @returns - A Promise that resolves with no value when the function completes.
  */
-const react = async (c: Context): Promise<void> => {
+const react = async (c: Context) => {
   try {
     const { messageId, chatId, reaction } = await c.req.json();
     const client = sessions.get(c.req.param("sessionId"))!;
@@ -230,9 +230,9 @@ const react = async (c: Context): Promise<void> => {
       throw new Error("Message not Found");
     }
     const result = await message.react(reaction);
-    c.json({ success: true, result });
+    return c.json({ success: true, result });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -242,7 +242,7 @@ const react = async (c: Context): Promise<void> => {
  * @param c - The context object.
  * @returns - A Promise that resolves with no value when the function completes.
  */
-const reply = async (c: Context): Promise<void> => {
+const reply = async (c: Context) => {
   try {
     const { messageId, chatId, content, destinationChatId } =
       await c.req.json();
@@ -252,9 +252,9 @@ const reply = async (c: Context): Promise<void> => {
       throw new Error("Message not Found");
     }
     const repliedMessage = await message.reply(content, destinationChatId);
-    c.json({ success: true, repliedMessage });
+    return c.json({ success: true, repliedMessage });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -264,7 +264,7 @@ const reply = async (c: Context): Promise<void> => {
  * @param c - The context object.
  * @returns - A Promise that resolves with no value when the function completes.
  */
-const star = async (c: Context): Promise<void> => {
+const star = async (c: Context) => {
   try {
     const { messageId, chatId } = await c.req.json();
     const client = sessions.get(c.req.param("sessionId"))!;
@@ -273,9 +273,9 @@ const star = async (c: Context): Promise<void> => {
       throw new Error("Message not Found");
     }
     const result = await message.star();
-    c.json({ success: true, result });
+    return c.json({ success: true, result });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -285,7 +285,7 @@ const star = async (c: Context): Promise<void> => {
  * @param c - The context object.
  * @returns - A Promise that resolves with no value when the function completes.
  */
-const unstar = async (c: Context): Promise<void> => {
+const unstar = async (c: Context) => {
   try {
     const { messageId, chatId } = await c.req.json();
     const client = sessions.get(c.req.param("sessionId"))!;
@@ -294,9 +294,9 @@ const unstar = async (c: Context): Promise<void> => {
       throw new Error("Message not Found");
     }
     const result = await message.unstar();
-    c.json({ success: true, result });
+    return c.json({ success: true, result });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 

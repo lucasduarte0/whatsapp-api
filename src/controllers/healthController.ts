@@ -20,9 +20,9 @@ const ping = async (c: Context) => {
     #swagger.tags = ['Various']
   */
   try {
-    c.json({ success: true, message: "pong" }, 200);
+    return c.json({ success: true, message: "pong" }, 200);
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -51,14 +51,14 @@ const localCallbackExample = async (c: Context) => {
       `${sessionFolderPath}/message_log.txt`,
       `${JSON.stringify(await c.req.json())}\r\n`
     );
-    c.json({ success: true });
+    return c.json({ success: true });
   } catch (error: any) {
     console.log(error);
     Bun.write(
       `${sessionFolderPath}/message_log.txt`,
       `(ERROR) ${JSON.stringify(error)}\r\n`
     );
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 

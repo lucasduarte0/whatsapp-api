@@ -14,11 +14,11 @@ const getClassInfo = async (c: Context) => {
     const client = sessions.get(c.req.param("sessionId"))!;
     const chat = await client.getChatById(chatId);
     if (!chat) {
-      sendErrorResponse(c, 404, "Chat not Found");
+      return sendErrorResponse(c, 404, "Chat not Found");
     }
-    c.json({ success: true, chat });
+    return c.json({ success: true, chat });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -36,12 +36,12 @@ const clearMessages = async (c: Context) => {
     const client = sessions.get(c.req.param("sessionId"))!;
     const chat = await client.getChatById(chatId);
     if (!chat) {
-      sendErrorResponse(c, 404, "Chat not Found");
+      return sendErrorResponse(c, 404, "Chat not Found");
     }
     const clearMessages = await chat.clearMessages();
-    c.json({ success: true, clearMessages });
+    return c.json({ success: true, clearMessages });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -59,12 +59,12 @@ const clearState = async (c: Context) => {
     const client = sessions.get(c.req.param("sessionId"))!;
     const chat = await client.getChatById(chatId);
     if (!chat) {
-      sendErrorResponse(c, 404, "Chat not Found");
+      return sendErrorResponse(c, 404, "Chat not Found");
     }
     const clearState = await chat.clearState();
-    c.json({ success: true, clearState });
+    return c.json({ success: true, clearState });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -82,12 +82,12 @@ const deleteChat = async (c: Context) => {
     const client = sessions.get(c.req.param("sessionId"))!;
     const chat = await client.getChatById(chatId);
     if (!chat) {
-      sendErrorResponse(c, 404, "Chat not Found");
+      return sendErrorResponse(c, 404, "Chat not Found");
     }
     const deleteChat = await chat.delete();
-    c.json({ success: true, deleteChat });
+    return c.json({ success: true, deleteChat });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -106,12 +106,12 @@ const fetchMessages = async (c: Context) => {
     const client = sessions.get(c.req.param("sessionId"))!;
     const chat = await client.getChatById(chatId);
     if (!chat) {
-      sendErrorResponse(c, 404, "Chat not Found");
+      return sendErrorResponse(c, 404, "Chat not Found");
     }
     const messages = await chat.fetchMessages(searchOptions);
-    c.json({ success: true, messages });
+    return c.json({ success: true, messages });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -129,12 +129,12 @@ const getContact = async (c: Context) => {
     const client = sessions.get(c.req.param("sessionId"))!;
     const chat = await client.getChatById(chatId);
     if (!chat) {
-      sendErrorResponse(c, 404, "Chat not Found");
+      return sendErrorResponse(c, 404, "Chat not Found");
     }
     const contact = await chat.getContact();
-    c.json({ success: true, contact });
+    return c.json({ success: true, contact });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -152,12 +152,12 @@ const sendStateRecording = async (c: Context) => {
     const client = sessions.get(c.req.param("sessionId"))!;
     const chat = await client.getChatById(chatId);
     if (!chat) {
-      sendErrorResponse(c, 404, "Chat not Found");
+      return sendErrorResponse(c, 404, "Chat not Found");
     }
     const sendStateRecording = await chat.sendStateRecording();
-    c.json({ success: true, sendStateRecording });
+    return c.json({ success: true, sendStateRecording });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -175,12 +175,12 @@ const sendStateTyping = async (c: Context) => {
     const client = sessions.get(c.req.param("sessionId"))!;
     const chat = await client.getChatById(chatId);
     if (!chat) {
-      sendErrorResponse(c, 404, "Chat not Found");
+      return sendErrorResponse(c, 404, "Chat not Found");
     }
     const sendStateTyping = await chat.sendStateTyping();
-    c.json({ success: true, sendStateTyping });
+    return c.json({ success: true, sendStateTyping });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 

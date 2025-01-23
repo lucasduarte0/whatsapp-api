@@ -162,10 +162,10 @@ const sendMessage = async (c: Context) => {
         );
     }
 
-    c.json({ success: true, message: messageOut });
+    return c.json({ success: true, message: messageOut });
   } catch (error: any) {
     console.log(error);
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -183,9 +183,9 @@ const getClassInfo = async (c: Context) => {
   try {
     const client = sessions.get(c.req.param("sessionId"))!;
     const sessionInfo = await client.info;
-    c.json({ success: true, sessionInfo });
+    return c.json({ success: true, sessionInfo });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -220,9 +220,9 @@ const isRegisteredUser = async (c: Context) => {
     const { number } = await c.req.json();
     const client = sessions.get(c.req.param("sessionId"))!;
     const result = await client.isRegisteredUser(number);
-    c.json({ success: true, result });
+    return c.json({ success: true, result });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -257,9 +257,9 @@ const getNumberId = async (c: Context) => {
     const { number } = await c.req.json();
     const client = sessions.get(c.req.param("sessionId"))!;
     const result = await client.getNumberId(number);
-    c.json({ success: true, result });
+    return c.json({ success: true, result });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -280,9 +280,9 @@ const createGroup = async (c: Context) => {
     const { name, participants } = await c.req.json();
     const client = sessions.get(c.req.param("sessionId"))!;
     const response = await client.createGroup(name, participants);
-    c.json({ success: true, response });
+    return c.json({ success: true, response });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -317,9 +317,9 @@ const setStatus = async (c: Context) => {
     const { status } = await c.req.json();
     const client = sessions.get(c.req.param("sessionId"))!;
     await client.setStatus(status);
-    c.json({ success: true });
+    return c.json({ success: true });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -335,9 +335,9 @@ const getContacts = async (c: Context) => {
   try {
     const client = sessions.get(c.req.param("sessionId"))!;
     const contacts = await client.getContacts();
-    c.json({ success: true, contacts });
+    return c.json({ success: true, contacts });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -359,9 +359,9 @@ const getChats = async (c: Context) => {
   try {
     const client = sessions.get(c.req.param("sessionId"))!;
     const chats = await client.getChats();
-    c.json({ success: true, chats });
+    return c.json({ success: true, chats });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -396,9 +396,9 @@ const getProfilePictureUrl = async (c: Context) => {
     const { contactId } = await c.req.json();
     const client = sessions.get(c.req.param("sessionId"))!;
     const result = await client.getProfilePicUrl(contactId);
-    c.json({ success: true, result });
+    return c.json({ success: true, result });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -434,9 +434,9 @@ const acceptInvite = async (c: Context) => {
     const { inviteCode } = await c.req.json();
     const client = sessions.get(c.req.param("sessionId"))!;
     const acceptInvite = await client.acceptInvite(inviteCode);
-    c.json({ success: true, acceptInvite });
+    return c.json({ success: true, acceptInvite });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -455,9 +455,9 @@ const getWWebVersion = async (c: Context) => {
   try {
     const client = sessions.get(c.req.param("sessionId"))!;
     const result = await client.getWWebVersion();
-    c.json({ success: true, result });
+    return c.json({ success: true, result });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -493,9 +493,9 @@ const archiveChat = async (c: Context) => {
     const { chatId } = await c.req.json();
     const client = sessions.get(c.req.param("sessionId"))!;
     const result = await client.archiveChat(chatId);
-    c.json({ success: true, result });
+    return c.json({ success: true, result });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -513,9 +513,9 @@ const getBlockedContacts = async (c: Context) => {
   try {
     const client = sessions.get(c.req.param("sessionId"))!;
     const blockedContacts = await client.getBlockedContacts();
-    c.json({ success: true, blockedContacts });
+    return c.json({ success: true, blockedContacts });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -550,9 +550,9 @@ const getChatById = async (c: Context) => {
     const { chatId } = await c.req.json();
     const client = sessions.get(c.req.param("sessionId"))!;
     const chat = await client.getChatById(chatId);
-    c.json({ success: true, chat });
+    return c.json({ success: true, chat });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -587,9 +587,9 @@ const getChatLabels = async (c: Context) => {
     const { chatId } = await c.req.json();
     const client = sessions.get(c.req.param("sessionId"))!;
     const chatLabels = await client.getChatLabels(chatId);
-    c.json({ success: true, chatLabels });
+    return c.json({ success: true, chatLabels });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -624,9 +624,9 @@ const getChatsByLabelId = async (c: Context) => {
     const { labelId } = await c.req.json();
     const client = sessions.get(c.req.param("sessionId"))!;
     const chats = await client.getChatsByLabelId(labelId);
-    c.json({ success: true, chats });
+    return c.json({ success: true, chats });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -660,9 +660,9 @@ const getCommonGroups = async (c: Context) => {
     const { contactId } = await c.req.json();
     const client = sessions.get(c.req.param("sessionId"))!;
     const groups = await client.getCommonGroups(contactId);
-    c.json({ success: true, groups });
+    return c.json({ success: true, groups });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -696,9 +696,9 @@ const getContactById = async (c: Context) => {
     const { contactId } = await c.req.json();
     const client = sessions.get(c.req.param("sessionId"))!;
     const contact = await client.getContactById(contactId);
-    c.json({ success: true, contact });
+    return c.json({ success: true, contact });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -732,9 +732,9 @@ const getInviteInfo = async (c: Context) => {
     const { inviteCode } = await c.req.json();
     const client = sessions.get(c.req.param("sessionId"))!;
     const inviteInfo = await client.getInviteInfo(inviteCode);
-    c.json({ success: true, inviteInfo });
+    return c.json({ success: true, inviteInfo });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -769,9 +769,9 @@ const getLabelById = async (c: Context) => {
     const { labelId } = await c.req.json();
     const client = sessions.get(c.req.param("sessionId"))!;
     const label = await client.getLabelById(labelId);
-    c.json({ success: true, label });
+    return c.json({ success: true, label });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -788,9 +788,9 @@ const getLabels = async (c: Context) => {
   try {
     const client = sessions.get(c.req.param("sessionId"))!;
     const labels = await client.getLabels();
-    c.json({ success: true, labels });
+    return c.json({ success: true, labels });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -827,9 +827,9 @@ const addOrRemoveLabels = async (c: Context) => {
     const { labelIds, chatIds } = await c.req.json();
     const client = sessions.get(c.req.param("sessionId"))!;
     const labels = await client.addOrRemoveLabels(labelIds, chatIds);
-    c.json({ success: true, labels });
+    return c.json({ success: true, labels });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -846,9 +846,9 @@ const getState = async (c: Context) => {
   try {
     const client = sessions.get(c.req.param("sessionId"))!;
     const state = await client.getState();
-    c.json({ success: true, state });
+    return c.json({ success: true, state });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -883,9 +883,9 @@ const markChatUnread = async (c: Context) => {
     const { chatId } = await c.req.json();
     const client = sessions.get(c.req.param("sessionId"))!;
     const mark = await client.markChatUnread(chatId);
-    c.json({ success: true, mark });
+    return c.json({ success: true, mark });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -931,9 +931,9 @@ const muteChat = async (c: Context) => {
     } else {
       mute = await client.muteChat(chatId);
     }
-    c.json({ success: true, mute });
+    return c.json({ success: true, mute });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -968,9 +968,9 @@ const pinChat = async (c: Context) => {
     const { chatId } = await c.req.json();
     const client = sessions.get(c.req.param("sessionId"))!;
     const result = await client.pinChat(chatId);
-    c.json({ success: true, result });
+    return c.json({ success: true, result });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 /**
@@ -1015,9 +1015,9 @@ const searchMessages = async (c: Context) => {
     } else {
       messages = await client.searchMessages(query);
     }
-    c.json({ success: true, messages });
+    return c.json({ success: true, messages });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -1034,9 +1034,9 @@ const sendPresenceAvailable = async (c: Context) => {
   try {
     const client = sessions.get(c.req.param("sessionId"))!;
     const presence = await client.sendPresenceAvailable();
-    c.json({ success: true, presence });
+    return c.json({ success: true, presence });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -1053,9 +1053,9 @@ const sendPresenceUnavailable = async (c: Context) => {
   try {
     const client = sessions.get(c.req.param("sessionId"))!;
     const presence = await client.sendPresenceUnavailable();
-    c.json({ success: true, presence });
+    return c.json({ success: true, presence });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -1089,9 +1089,9 @@ const sendSeen = async (c: Context) => {
     const { chatId } = await c.req.json();
     const client = sessions.get(c.req.param("sessionId"))!;
     const result = await client.sendSeen(chatId);
-    c.json({ success: true, result });
+    return c.json({ success: true, result });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -1125,9 +1125,9 @@ const setDisplayName = async (c: Context) => {
     const { displayName } = await c.req.json();
     const client = sessions.get(c.req.param("sessionId"))!;
     const result = await client.setDisplayName(displayName);
-    c.json({ success: true, result });
+    return c.json({ success: true, result });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -1161,9 +1161,9 @@ const unarchiveChat = async (c: Context) => {
     const { chatId } = await c.req.json();
     const client = sessions.get(c.req.param("sessionId"))!;
     const result = await client.unarchiveChat(chatId);
-    c.json({ success: true, result });
+    return c.json({ success: true, result });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -1198,9 +1198,9 @@ const unmuteChat = async (c: Context) => {
     const { chatId } = await c.req.json();
     const client = sessions.get(c.req.param("sessionId"))!;
     const result = await client.unmuteChat(chatId);
-    c.json({ success: true, result });
+    return c.json({ success: true, result });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -1235,9 +1235,9 @@ const unpinChat = async (c: Context) => {
     const { chatId } = await c.req.json();
     const client = sessions.get(c.req.param("sessionId"))!;
     const result = await client.unpinChat(chatId);
-    c.json({ success: true, result });
+    return c.json({ success: true, result });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
@@ -1278,9 +1278,9 @@ const setProfilePicture = async (c: Context) => {
     const client = sessions.get(c.req.param("sessionId"))!;
     const media = new MessageMedia(pictureMimetype, pictureData);
     const result = await client.setProfilePicture(media);
-    c.json({ success: true, result });
+    return c.json({ success: true, result });
   } catch (error: any) {
-    sendErrorResponse(c, 500, error.message);
+    return sendErrorResponse(c, 500, error.message);
   }
 };
 
