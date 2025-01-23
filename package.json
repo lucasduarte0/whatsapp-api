@@ -7,13 +7,16 @@
     "start": "bun start src/app.ts",
     "dev": "bun run src/app.ts --watch --hot",
     "build": "tsc",
-    "test": "jest --runInBand"
+    "test": "jest --runInBand",
+    "swagger": "bun run ./swagger.ts"
   },
   "dependencies": {
+    "@hono/swagger-ui": "^0.5.0",
     "@types/bun": "^1.2.0",
     "axios": "^1.7.9",
     "dotenv": "^16.4.7",
     "hono": "^4.6.17",
+    "mongoose": "^8.9.5",
     "qr-image": "^3.2.0",
     "qrcode-terminal": "^0.12.0",
     "typescript": "^5.7.3",
@@ -31,6 +34,7 @@
     "globals": "^15.14.0",
     "jest": "^29.5.0",
     "supertest": "^6.3.3",
+    "swagger-autogen": "^2.23.7",
     "typescript-eslint": "^8.21.0"
   },
   "keywords": [

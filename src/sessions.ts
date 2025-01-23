@@ -6,6 +6,7 @@ import {
 } from "whatsapp-web.js";
 import * as fs from "fs";
 import * as path from "path";
+import MessageModel from './models/Message';
 
 // Create interface that add qr to Client type
 export interface ClientWithQR extends Client {
@@ -189,7 +190,7 @@ const setupSession = (sessionId: string) => {
 
     client
       .initialize()
-      .catch((err) => console.log("Initialize error:", err.message));
+      .catch((err) => console.log("Initialize error:", err.message))
 
     initializeEvents(client, sessionId);
 
@@ -201,7 +202,7 @@ const setupSession = (sessionId: string) => {
   }
 };
 
-const initializeEvents = (client: Client, sessionId: string) => {
+const initializeEvents = (client: ClientWithQR, sessionId: string) => {
   // check if the session webhook is overridden
   const sessionWebhook =
     process.env[sessionId.toUpperCase() + "_WEBHOOK_URL"] || baseWebhookURL;
@@ -300,6 +301,14 @@ const initializeEvents = (client: Client, sessionId: string) => {
   checkIfEventisEnabled("message").then(() => {
     client.on("message", async (message) => {
       triggerWebhook(sessionWebhook, sessionId, "message", { message });
+      
+      // Save message to MongoDB
+      const newMessage = new MessageModel({
+        body: message.body,
+        from: message.from,
+        // Add other fields as needed
+      });
+      await newMessage.save();
       if (message.hasMedia) {
         // custom service event
         checkIfEventisEnabled("media").then(() => {
@@ -390,7 +399,7 @@ const initializeEvents = (client: Client, sessionId: string) => {
 
   client.on("qr", (qr) => {
     // inject qr code into session
-    // client.qr = qr;
+    client.qr = qr;
     checkIfEventisEnabled("qr").then(() => {
       triggerWebhook(sessionWebhook, sessionId, "qr", { qr });
     });

@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { some } from "hono/combine";
-// import swaggerUi from 'swagger-ui-express';
+import { swaggerUI } from "@hono/swagger-ui";
+import { serveStatic } from "hono/bun";
 // import swaggerDocument from '../swagger.json';
 import config from "./config";
 
@@ -12,11 +13,9 @@ import * as chatController from "./controllers/chatController";
 import * as groupChatController from "./controllers/groupChatController";
 import * as messageController from "./controllers/messageController";
 import * as contactController from "./controllers/contactController";
+import adminRoutes from "./routes/admin";
 
-const {
-  enableLocalCallbackExample,
-  // enableSwaggerEndpoint
-} = config;
+const { enableLocalCallbackExample, enableSwaggerEndpoint } = config;
 
 const routes = new Hono();
 
@@ -82,6 +81,13 @@ sessionRouter.get(
 sessionRouter.get("/terminateAll", sessionController.terminateAllSessions);
 
 routes.route("/session", sessionRouter);
+
+/**
+ * ================
+ * ADMIN UI ENDPOINTS
+ * ================
+ */
+routes.route("/admin", adminRoutes);
 
 /**
  * ================
@@ -484,7 +490,7 @@ routes.route("/message", messageRouter);
 
 /**
  * ================
- * MESSAGE ENDPOINTS
+ * CONTACT ENDPOINTS
  * ================
  */
 const contactRouter = new Hono();
@@ -533,14 +539,15 @@ contactRouter.post(
 );
 
 routes.route("/contact", contactRouter);
+
 /**
  * ================
  * SWAGGER ENDPOINTS
  * ================
  */
-// if (enableSwaggerEndpoint) {
-//   routes.route('/api-docs', swaggerUi.serve)
-//   routes.get('/api-docs', swaggerUi.setup(swaggerDocument) /* #swagger.ignore = true */)
-// }
+if (enableSwaggerEndpoint) {
+  routes.get("/docs", serveStatic({ path: "./src/static/swagger.json" }));
+  routes.get("/ui", swaggerUI({ url: "/doc" }));
+}
 
 export default routes;
