@@ -112,7 +112,7 @@ const restoreSessions = () => {
         const match = file.match(/^session-(.+)$/);
         if (match) {
           const sessionId = match[1];
-          console.log("existing session detected", sessionId);
+          console.log(`[SESSION] ${sessionId}: Existing session detected`);
           setupSession(sessionId);
         }
       }
@@ -268,7 +268,7 @@ const deleteSession = async (
     client.pupPage?.removeAllListeners("error");
     if (validation.success) {
       // Client Connected, request logout
-      console.log(`Logging out session ${sessionId}`);
+      console.log(`[]Logging out`);
       await client.logout();
     } else if (validation.message === "session_not_connected") {
       // Client not Connected, request destroy

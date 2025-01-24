@@ -1,6 +1,6 @@
 import { MessageTypes } from "whatsapp-web.js";
 import config from "./config";
-import MessageModel from "./models/Message";
+import MessageModel from "./models/Message.model";
 import { ClientWithQR, sessions, setupSession } from "./sessions";
 import {
   waitForNestedObject,
@@ -25,13 +25,13 @@ export const initializeEvents = (client: ClientWithQR, sessionId: string) => {
         };
         client.pupPage?.once("close", function () {
           // emitted when the page closes
-          console.log(`Browser page closed for ${sessionId}. Restoring`);
+          console.log(`[SERVER] Browser page closed for ${sessionId}. Restoring`);
           restartSession(sessionId);
         });
         client.pupPage?.once("error", function () {
           // emitted when the page crashes
           console.log(
-            `Error occurred on browser page for ${sessionId}. Restoring`
+            `[SERVER] Error occurred on browser page for ${sessionId}. Restoring`
           );
           restartSession(sessionId);
         });
@@ -47,6 +47,7 @@ export const initializeEvents = (client: ClientWithQR, sessionId: string) => {
 
   checkIfEventisEnabled("authenticated").then(() => {
     client.on("authenticated", () => {
+      console.log(`[SESSION] ${sessionId}: Authenticated`);
       triggerWebhook(sessionWebhook, sessionId, "authenticated");
     });
   });
@@ -108,6 +109,8 @@ export const initializeEvents = (client: ClientWithQR, sessionId: string) => {
 
   checkIfEventisEnabled("message").then(() => {
     client.on("message", async (message) => {
+      console.log(`[SESSION] ${sessionId}: Message received from ${(await message.getContact()).name ?? message.from}`);
+
       triggerWebhook(sessionWebhook, sessionId, "message", { message });
 
       if (message.type === MessageTypes.TEXT) {
@@ -117,11 +120,6 @@ export const initializeEvents = (client: ClientWithQR, sessionId: string) => {
         await newMessage.save();
       }
 
-      // Save message to MongoDB
-      // const newMessage = new MessageModel({
-      //   ...message,
-      // });
-      // await newMessage.save();
       if (message.hasMedia) {
         // custom service event
         checkIfEventisEnabled("media").then(() => {
@@ -228,6 +226,7 @@ export const initializeEvents = (client: ClientWithQR, sessionId: string) => {
 
   checkIfEventisEnabled("ready").then(() => {
     client.on("ready", () => {
+      console.log(`[SESSION] ${sessionId}: Ready`);
       triggerWebhook(sessionWebhook, sessionId, "ready");
     });
   });
