@@ -5,13 +5,14 @@
   "main": "src/server.ts",
   "scripts": {
     "start": "bun start src/app.ts",
-    "dev": "bun run src/app.ts --watch --hot",
+    "dev": "NODE_ENV=development bun run src/app.ts --watch --hot",
     "build": "tsc",
     "test": "jest --runInBand",
     "swagger": "bun run ./swagger.ts"
   },
   "dependencies": {
     "@hono/swagger-ui": "^0.5.0",
+    "@hono/zod-validator": "^0.4.2",
     "@types/bun": "^1.2.0",
     "axios": "^1.7.9",
     "dotenv": "^16.4.7",
@@ -20,7 +21,8 @@
     "qr-image": "^3.2.0",
     "qrcode-terminal": "^0.12.0",
     "typescript": "^5.7.3",
-    "whatsapp-web.js": "github:pedroslopez/whatsapp-web.js"
+    "whatsapp-web.js": "github:pedroslopez/whatsapp-web.js",
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.18.0",

@@ -7,10 +7,13 @@ import {
   MessageTypes,
 } from "whatsapp-web.js";
 import ContactModel, { IContact } from "./Contact.model";
+import { getContact } from "../services/contactService";
+import { IMessageMedia } from "./MessageMedia.model";
 
 // Define the IMessage interface
 interface IMessage extends Document {
   sessionId: string;
+  messageId: string;
   ack?: MessageAck;
   author?: string;
   deviceType?: string;
@@ -66,89 +69,95 @@ interface IMessage extends Document {
 
   /** Reference to a Contact document (ObjectId) */
   contact?: IContact["_id"];
+  messageMedia?: IMessageMedia["_id"];
 }
 
-// Define the MessageSchema
 const MessageSchema: Schema = new Schema(
   {
-    sessionId: { type: String, required: true },
-    ack: { type: String, enum: Object.values(MessageAck), required: false },
-    author: { type: String, required: false },
-    deviceType: { type: String, required: false },
-    body: { type: String, required: false },
-    broadcast: { type: Boolean, required: false },
-    isStatus: { type: Boolean, required: false },
-    isGif: { type: Boolean, required: false },
-    isEphemeral: { type: Boolean, required: false },
-    from: { type: String, required: false },
-    fromMe: { type: Boolean, required: false },
-    hasMedia: { type: Boolean, required: false },
-    hasQuotedMsg: { type: Boolean, required: false },
-    hasReaction: { type: Boolean, required: false },
-    duration: { type: String, required: false },
-    id: { type: Object, required: false },
-    isForwarded: { type: Boolean, required: false },
-    forwardingScore: { type: Number, required: false },
-    isStarred: { type: Boolean, required: false },
-    location: { type: String, required: false },
-    vCards: { type: [String], required: false },
-    inviteV4: { type: Object, required: false },
-    mediaKey: { type: String, required: false },
-    mentionedIds: { type: [String], required: false },
+    sessionId: { type: String, required: true }, // Required
+    messageId: { type: String, required: true }, // Required
+    ack: { type: String, enum: Object.values(MessageAck), required: false }, // Not required
+    author: { type: String, required: false }, // Not required
+    deviceType: { type: String, required: false }, // Not required
+    body: { type: String, required: false }, // Not required
+    broadcast: { type: Boolean, required: false }, // Not required
+    isStatus: { type: Boolean, required: false }, // Not required
+    isGif: { type: Boolean, required: false }, // Not required
+    isEphemeral: { type: Boolean, required: false }, // Not required
+    from: { type: String, required: false }, // Not required
+    fromMe: { type: Boolean, required: false }, // Not required
+    hasMedia: { type: Boolean, required: false }, // Not required
+    hasQuotedMsg: { type: Boolean, required: false }, // Not required
+    hasReaction: { type: Boolean, required: false }, // Not required
+    duration: { type: String, required: false }, // Not required
+    id: { type: Object, required: false }, // Not required
+    isForwarded: { type: Boolean, required: false }, // Not required
+    forwardingScore: { type: Number, required: false }, // Not required
+    isStarred: { type: Boolean, required: false }, // Not required
+    location: { type: String, required: false }, // Not required
+    vCards: { type: [String], required: false }, // Not required
+    inviteV4: { type: Object, required: false }, // Not required
+    mediaKey: { type: String, required: false }, // Not required
+    mentionedIds: { type: [String], required: false }, // Not required
     groupMentions: {
       type: [
         {
-          groupSubject: { type: String, required: false },
+          groupSubject: { type: String, required: false }, // Not required
           groupJid: {
-            server: { type: String, required: false },
-            user: { type: String, required: false },
-            _serialized: { type: String, required: false },
+            server: { type: String, required: false }, // Not required
+            user: { type: String, required: false }, // Not required
+            _serialized: { type: String, required: false }, // Not required
           },
         },
       ],
-      required: false,
+      required: false, // Not required
     },
-    timestamp: { type: Number, required: false },
-    to: { type: String, required: false },
-    type: { type: String, enum: Object.values(MessageTypes), required: false },
+    timestamp: { type: Number, required: false }, // Not required
+    to: { type: String, required: false }, // Not required
+    type: { type: String, enum: Object.values(MessageTypes), required: false }, // Not required
     links: {
       type: [
         {
-          link: { type: String, required: false },
-          isSuspicious: { type: Boolean, required: false },
+          link: { type: String, required: false }, // Not required
+          isSuspicious: { type: Boolean, required: false }, // Not required
         },
       ],
-      required: false,
+      required: false, // Not required
     },
-    orderId: { type: String, required: false },
-    title: { type: String, required: false },
-    description: { type: String, required: false },
-    businessOwnerJid: { type: String, required: false },
-    productId: { type: String, required: false },
-    latestEditSenderTimestampMs: { type: Number, required: false },
-    latestEditMsgKey: { type: Object, required: false },
-    dynamicReplyButtons: { type: Object, required: false },
-    selectedButtonId: { type: String, required: false },
-    selectedRowId: { type: String, required: false },
-    rawData: { type: Object, required: false },
-    pollName: { type: String, required: false },
-    pollOptions: { type: [String], required: false },
-    allowMultipleAnswers: { type: Boolean, required: false },
+    orderId: { type: String, required: false }, // Not required
+    title: { type: String, required: false }, // Not required
+    description: { type: String, required: false }, // Not required
+    businessOwnerJid: { type: String, required: false }, // Not required
+    productId: { type: String, required: false }, // Not required
+    latestEditSenderTimestampMs: { type: Number, required: false }, // Not required
+    latestEditMsgKey: { type: Object, required: false }, // Not required
+    dynamicReplyButtons: { type: Object, required: false }, // Not required
+    selectedButtonId: { type: String, required: false }, // Not required
+    selectedRowId: { type: String, required: false }, // Not required
+    rawData: { type: Object, required: false }, // Not required
+    pollName: { type: String, required: false }, // Not required
+    pollOptions: { type: [String], required: false }, // Not required
+    allowMultipleAnswers: { type: Boolean, required: false }, // Not required
     contact: {
       type: Schema.Types.ObjectId,
       ref: "Contact",
-      required: false,
+      required: false, // Not required
+    },
+    messageMedia: {
+      type: Schema.Types.ObjectId,
+      ref: "MessageMedia",
+      required: false, // Not required
     },
   },
   {
-    timestamps: true, // optional, but often useful
+    timestamps: true, // Adds createdAt and updatedAt timestamps
   }
 );
 
 // Pre-save middleware for Message model
 MessageSchema.pre<IMessage>("save", async function (next) {
   // `this` refers to the document being saved
-  const message = this as IMessage
+  const message = this as IMessage;
 
   try {
     // Check if the message doesn't have a contact associated and it has a 'from' field
@@ -158,12 +167,14 @@ MessageSchema.pre<IMessage>("save", async function (next) {
 
       // If contact doesn't exist, create a new one
       if (!contact) {
+        const contactDb = await getContact(message.sessionId, message.from);
         contact = new ContactModel({
-          phone: message.from,
-          // Add other fields that are necessary for the contact
+          sessionId: message.sessionId,
+          contactId: message.id?._serialized,
+          ...contactDb,
         });
 
-        await contact.save();
+        contact = await contact.save();
       }
 
       // Associate the found or newly created contact with the message
@@ -174,7 +185,7 @@ MessageSchema.pre<IMessage>("save", async function (next) {
     next();
   } catch (error) {
     console.error("Error in pre-save middleware for Message model:", error);
-    next(error); // Pass the error to the next middleware
+    next(); // Pass the error to the next middleware
   }
 });
 

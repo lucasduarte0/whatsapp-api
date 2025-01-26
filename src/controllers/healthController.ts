@@ -50,29 +50,37 @@ const localCallbackExample = async (c: Context) => {
       qrcode.generate(data.qr, { small: true });
     }
 
-    // Read the existing log file
+    // Define the log file path
     const logFilePath = `${sessionFolderPath}/message_log.jsonc`;
     let existingData = [];
 
     try {
       const fileContent = await fsPromises.readFile(logFilePath, "utf8");
       const strippedContent = stripJsonComments(fileContent);
-      existingData = JSON.parse(strippedContent);
+
+      // Attempt to parse the JSON
+      try {
+        existingData = JSON.parse(strippedContent);
+      } catch (parseError: any) {
+        console.error("Error parsing JSON data:", parseError?.message);
+        console.error("File content was:", strippedContent); // Debug the content
+        throw new Error("Failed to parse log file JSON."); // Throw or handle parsing error
+      }
     } catch (readError: any) {
       console.error("Error reading log file:", readError.message);
       console.error("Stack trace:", readError.stack);
     }
 
     // Append new entry
-    existingData.push(await c.req.json());
+    existingData.push({ dataType, data }); // Avoid reading request body again
 
     // Write updated data back to the log file
     const jsonString = JSON.stringify(existingData, null, 2) + "\r\n";
-    Bun.write(logFilePath, jsonString);
+    await fsPromises.writeFile(logFilePath, jsonString);
 
     return c.json({ success: true });
   } catch (error: any) {
-    console.log(error);
+    console.error("Error processing request:", error.message);
     return sendErrorResponse(c, 500, error.message);
   }
 };

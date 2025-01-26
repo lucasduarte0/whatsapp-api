@@ -1,12 +1,15 @@
 import { MessageTypes } from "whatsapp-web.js";
 import config from "./config";
-import MessageModel from "./models/Message.model";
 import { ClientWithQR, sessions, setupSession } from "./sessions";
 import {
   waitForNestedObject,
   checkIfEventisEnabled,
   triggerWebhook,
 } from "./utils";
+import {
+  handleSaveMediaMessage,
+  handleSaveTextMessage,
+} from "./services/messageService";
 
 const { baseWebhookURL, setMessagesAsSeen, recoverSessions } = config;
 
@@ -25,7 +28,9 @@ export const initializeEvents = (client: ClientWithQR, sessionId: string) => {
         };
         client.pupPage?.once("close", function () {
           // emitted when the page closes
-          console.log(`[SERVER] Browser page closed for ${sessionId}. Restoring`);
+          console.log(
+            `[SERVER] Browser page closed for ${sessionId}. Restoring`
+          );
           restartSession(sessionId);
         });
         client.pupPage?.once("error", function () {
@@ -109,31 +114,32 @@ export const initializeEvents = (client: ClientWithQR, sessionId: string) => {
 
   checkIfEventisEnabled("message").then(() => {
     client.on("message", async (message) => {
-      console.log(`[SESSION] ${sessionId}: Message received from ${(await message.getContact()).name ?? message.from}`);
+      console.log(
+        `[SESSION] ${sessionId}: Message received from ${
+          (await message.getContact()).name ?? message.from
+        }`
+      );
 
       triggerWebhook(sessionWebhook, sessionId, "message", { message });
 
       if (message.type === MessageTypes.TEXT) {
-        const newMessage = new MessageModel({
-          ...message,
-        });
-        await newMessage.save();
+        await handleSaveTextMessage(sessionId, message);
       }
 
       if (message.hasMedia) {
         // custom service event
-        checkIfEventisEnabled("media").then(() => {
-          message
-            .downloadMedia()
-            .then((messageMedia) => {
-              triggerWebhook(sessionWebhook, sessionId, "media", {
-                messageMedia,
-                message,
-              });
-            })
-            .catch((e) => {
-              console.log("Download media error:", e.message);
+        checkIfEventisEnabled("media").then(async () => {
+          try {
+            const messageMedia = await message.downloadMedia();
+            await handleSaveMediaMessage(sessionId, message, messageMedia);
+
+            triggerWebhook(sessionWebhook, sessionId, "media", {
+              messageMedia,
+              message,
             });
+          } catch (error) {
+            console.error("Error downloading media:", error);
+          }
         });
       }
       if (setMessagesAsSeen) {
@@ -158,13 +164,15 @@ export const initializeEvents = (client: ClientWithQR, sessionId: string) => {
 
   checkIfEventisEnabled("message_create").then(() => {
     client.on("message_create", async (message) => {
+      console.log(
+        `[SESSION] ${sessionId}: Message created from ${
+          (await message.getContact()).name ?? message.from
+        }`
+      );
       triggerWebhook(sessionWebhook, sessionId, "message_create", { message });
 
       if (message.type === MessageTypes.TEXT) {
-        const newMessage = new MessageModel({
-          ...message,
-        });
-        await newMessage.save();
+        await handleSaveTextMessage(sessionId, message);
       }
 
       if (setMessagesAsSeen) {
@@ -228,6 +236,9 @@ export const initializeEvents = (client: ClientWithQR, sessionId: string) => {
     client.on("ready", () => {
       console.log(`[SESSION] ${sessionId}: Ready`);
       triggerWebhook(sessionWebhook, sessionId, "ready");
+
+      // Run save last messages
+      
     });
   });
 

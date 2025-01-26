@@ -146,7 +146,7 @@ const setupSession = (sessionId: string) => {
     const clientOptions: ClientOptions = {
       puppeteer: {
         executablePath: process.env["CHROME_BIN"] || undefined,
-        // headless: false,
+        headless: process.env.NODE_ENV === "production" ? true : false,
         args: [
           "--no-sandbox",
           "--disable-setuid-sandbox",
