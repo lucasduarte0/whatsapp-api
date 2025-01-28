@@ -13,6 +13,7 @@
   "dependencies": {
     "@hono/swagger-ui": "^0.5.0",
     "@hono/zod-validator": "^0.4.2",
+    "@scalar/hono-api-reference": "^0.5.169",
     "@types/bun": "^1.2.0",
     "axios": "^1.7.9",
     "dotenv": "^16.4.7",
@@ -22,7 +23,8 @@
     "qrcode-terminal": "^0.12.0",
     "typescript": "^5.7.3",
     "whatsapp-web.js": "github:pedroslopez/whatsapp-web.js",
-    "zod": "^3.24.1"
+    "zod": "^3.24.1",
+    "zod-openapi": "^4.2.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.18.0",
