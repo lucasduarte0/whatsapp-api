@@ -14,42 +14,15 @@ import { z } from "zod";
 import { describeRoute } from "hono-openapi";
 import type { Context } from "hono";
 import { StatusCode } from "hono/utils/http-status";
+import { errorResponses, SessionIdSchema } from "../schemas";
 
 const sessionRouter = new Hono();
 sessionRouter.use(middleware.apikey);
-
-const SessionIdSchema = z.object({
-  sessionId: z.string().min(3),
-});
 
 // Reusable error handling function
 const handleError = (c: Context, status: StatusCode, message: any) => {
   console.log(message);
   return sendErrorResponse(c, status, message);
-};
-
-// Reusable describeRoute errors
-const errorResponses = {
-  422: {
-    description: "Unprocessable Entity",
-    content: {
-      "application/json": {
-        schema: resolver(
-          z.object({ success: z.boolean(), message: z.string() })
-        ),
-      },
-    },
-  },
-  500: {
-    description: "Internal Server Error",
-    content: {
-      "application/json": {
-        schema: resolver(
-          z.object({ success: z.boolean(), message: z.string() })
-        ),
-      },
-    },
-  },
 };
 
 sessionRouter.get(

@@ -40,11 +40,22 @@ routes.get(
   openAPISpecs(routes, {
     documentation: {
       info: {
-        title: "Hono API",
-        version: "1.0.0",
-        description: "Greeting API",
+        title: "WhatsApp API", // Change the title to match your API
+        version: "1.0.0", // Version from the swagger.json
+        description: "API Wrapper for WhatsAppWebJS", // Updated description
       },
-      servers: [{ url: "http://localhost:3000", description: "Local Server" }],
+      components: {
+        securitySchemes: {
+          apiKeyAuth: {
+            // Match with swagger.json
+            type: "apiKey",
+            in: "header",
+            name: "x-api-key",
+          },
+        },
+      },
+      security: [{ apiKeyAuth: [] }], // Apply security globally
+      servers: [{ url: "http://localhost:3000", description: "localhost" }],
     },
   })
 );

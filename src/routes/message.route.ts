@@ -5,6 +5,10 @@ import middleware from "../middleware";
 import { ClientWithQR, sessions } from "../sessions";
 import { sendErrorResponse } from "../utils";
 
+import { validator as zv } from "hono-openapi/zod";
+import { z } from "zod";
+import { SessionIdSchema } from "../schemas";
+
 const messageRouter = new Hono();
 messageRouter.use(middleware.apikey);
 
@@ -21,13 +25,22 @@ const _getMessageById = async (
   return message;
 };
 
+const MessageSchema = z.object({
+  messageId: z.string(),
+  chatId: z.string(),
+});
+
 messageRouter.post(
   "/getClassInfo/:sessionId",
+  zv("param", SessionIdSchema),
+  zv("json", MessageSchema),
   some(middleware.sessionNameValidation, middleware.sessionValidation),
   async (c) => {
     try {
-      const { messageId, chatId } = await c.req.json();
-      const client = sessions.get(c.req.param("sessionId"))!;
+      const { messageId, chatId } = c.req.valid("json");
+      const { sessionId } = c.req.valid("param");
+
+      const client = sessions.get(sessionId)!;
 
       const message = await _getMessageById(client, messageId, chatId);
       if (!message) {
@@ -39,20 +52,25 @@ messageRouter.post(
     }
   }
 );
+
 messageRouter.post(
   "/delete/:sessionId",
+  zv("param", SessionIdSchema),
+  zv("json", MessageSchema.extend({ everyone: z.boolean() })),
   some(middleware.sessionNameValidation, middleware.sessionValidation),
   async (c) => {
     try {
-      const { messageId, chatId, everyone } = await c.req.json();
-      const client = sessions.get(c.req.param("sessionId"))!;
+      const { messageId, chatId, everyone } = c.req.valid("json");
+      const { sessionId } = c.req.valid("param");
+
+      const client = sessions.get(sessionId)!;
+
       const message = await _getMessageById(client, messageId, chatId);
       if (!message) {
         throw new Error("Message not Found");
       }
-      const result = await message.delete(
-        everyone === "true" || everyone === "1"
-      );
+      const result = await message.delete(everyone);
+
       return c.json({ success: true, result });
     } catch (error: any) {
       return sendErrorResponse(c, 500, error.message);
@@ -61,11 +79,15 @@ messageRouter.post(
 );
 messageRouter.post(
   "/downloadMedia/:sessionId",
+  zv("param", SessionIdSchema),
+  zv("json", MessageSchema),
   some(middleware.sessionNameValidation, middleware.sessionValidation),
   async (c) => {
     try {
-      const { messageId, chatId } = await c.req.json();
-      const client = sessions.get(c.req.param("sessionId"))!;
+      const { messageId, chatId } = c.req.valid("json");
+      const { sessionId } = c.req.valid("param");
+
+      const client = sessions.get(sessionId)!;
       const message = await _getMessageById(client, messageId, chatId);
       if (!message) {
         throw new Error("Message not Found");
@@ -79,11 +101,16 @@ messageRouter.post(
 );
 messageRouter.post(
   "/forward/:sessionId",
+  zv("param", SessionIdSchema),
+  zv("json", MessageSchema.extend({ destinationChatId: z.string() })),
   some(middleware.sessionNameValidation, middleware.sessionValidation),
   async (c) => {
     try {
-      const { messageId, chatId, destinationChatId } = await c.req.json();
-      const client = sessions.get(c.req.param("sessionId"))!;
+      const { messageId, chatId, destinationChatId } = c.req.valid("json");
+      const { sessionId } = c.req.valid("param");
+
+      const client = sessions.get(sessionId)!;
+
       const message = await _getMessageById(client, messageId, chatId);
       if (!message) {
         throw new Error("Message not Found");
@@ -97,11 +124,15 @@ messageRouter.post(
 );
 messageRouter.post(
   "/getInfo/:sessionId",
+  zv("param", SessionIdSchema),
+  zv("json", MessageSchema),
   some(middleware.sessionNameValidation, middleware.sessionValidation),
   async (c) => {
     try {
-      const { messageId, chatId } = await c.req.json();
-      const client = sessions.get(c.req.param("sessionId"))!;
+      const { messageId, chatId } = c.req.valid("json");
+      const { sessionId } = c.req.valid("param");
+
+      const client = sessions.get(sessionId)!;
       const message = await _getMessageById(client, messageId, chatId);
       if (!message) {
         throw new Error("Message not Found");
@@ -115,11 +146,15 @@ messageRouter.post(
 );
 messageRouter.post(
   "/getMentions/:sessionId",
+  zv("param", SessionIdSchema),
+  zv("json", MessageSchema),
   some(middleware.sessionNameValidation, middleware.sessionValidation),
   async (c) => {
     try {
-      const { messageId, chatId } = await c.req.json();
-      const client = sessions.get(c.req.param("sessionId"))!;
+      const { messageId, chatId } = c.req.valid("json");
+      const { sessionId } = c.req.valid("param");
+
+      const client = sessions.get(sessionId)!;
       const message = await _getMessageById(client, messageId, chatId);
       if (!message) {
         throw new Error("Message not Found");
@@ -133,11 +168,15 @@ messageRouter.post(
 );
 messageRouter.post(
   "/getOrder/:sessionId",
+  zv("param", SessionIdSchema),
+  zv("json", MessageSchema),
   some(middleware.sessionNameValidation, middleware.sessionValidation),
   async (c) => {
     try {
-      const { messageId, chatId } = await c.req.json();
-      const client = sessions.get(c.req.param("sessionId"))!;
+      const { messageId, chatId } = c.req.valid("json");
+      const { sessionId } = c.req.valid("param");
+
+      const client = sessions.get(sessionId)!;
       const message = await _getMessageById(client, messageId, chatId);
       if (!message) {
         throw new Error("Message not Found");
@@ -151,11 +190,15 @@ messageRouter.post(
 );
 messageRouter.post(
   "/getPayment/:sessionId",
+  zv("param", SessionIdSchema),
+  zv("json", MessageSchema),
   some(middleware.sessionNameValidation, middleware.sessionValidation),
   async (c) => {
     try {
-      const { messageId, chatId } = await c.req.json();
-      const client = sessions.get(c.req.param("sessionId"))!;
+      const { messageId, chatId } = c.req.valid("json");
+      const { sessionId } = c.req.valid("param");
+
+      const client = sessions.get(sessionId)!;
       const message = await _getMessageById(client, messageId, chatId);
       if (!message) {
         throw new Error("Message not Found");
@@ -169,11 +212,15 @@ messageRouter.post(
 );
 messageRouter.post(
   "/getQuotedMessage/:sessionId",
+  zv("param", SessionIdSchema),
+  zv("json", MessageSchema),
   some(middleware.sessionNameValidation, middleware.sessionValidation),
   async (c) => {
     try {
-      const { messageId, chatId } = await c.req.json();
-      const client = sessions.get(c.req.param("sessionId"))!;
+      const { messageId, chatId } = c.req.valid("json");
+      const { sessionId } = c.req.valid("param");
+
+      const client = sessions.get(sessionId)!;
       const message = await _getMessageById(client, messageId, chatId);
       if (!message) {
         throw new Error("Message not Found");
@@ -187,11 +234,16 @@ messageRouter.post(
 );
 messageRouter.post(
   "/react/:sessionId",
+  zv("param", SessionIdSchema),
+  zv("json", MessageSchema.extend({ reaction: z.string() })),
   some(middleware.sessionNameValidation, middleware.sessionValidation),
   async (c) => {
     try {
-      const { messageId, chatId, reaction } = await c.req.json();
-      const client = sessions.get(c.req.param("sessionId"))!;
+      const { messageId, chatId, reaction } = c.req.valid("json");
+      const { sessionId } = c.req.valid("param");
+
+      const client = sessions.get(sessionId)!;
+
       const message = await _getMessageById(client, messageId, chatId);
       if (!message) {
         throw new Error("Message not Found");
@@ -205,12 +257,20 @@ messageRouter.post(
 );
 messageRouter.post(
   "/reply/:sessionId",
+  zv("param", SessionIdSchema),
+  zv(
+    "json",
+    MessageSchema.extend({ destinationChatId: z.string(), content: z.any() })
+  ),
   some(middleware.sessionNameValidation, middleware.sessionValidation),
   async (c) => {
     try {
-      const { messageId, chatId, content, destinationChatId } =
-        await c.req.json();
-      const client = sessions.get(c.req.param("sessionId"))!;
+      const { messageId, chatId, destinationChatId, content } =
+        c.req.valid("json");
+      const { sessionId } = c.req.valid("param");
+
+      const client = sessions.get(sessionId)!;
+
       const message = await _getMessageById(client, messageId, chatId);
       if (!message) {
         throw new Error("Message not Found");
@@ -224,11 +284,16 @@ messageRouter.post(
 );
 messageRouter.post(
   "/star/:sessionId",
+  zv("param", SessionIdSchema),
+  zv("json", MessageSchema),
   some(middleware.sessionNameValidation, middleware.sessionValidation),
   async (c) => {
     try {
-      const { messageId, chatId } = await c.req.json();
-      const client = sessions.get(c.req.param("sessionId"))!;
+      const { messageId, chatId } = c.req.valid("json");
+      const { sessionId } = c.req.valid("param");
+
+      const client = sessions.get(sessionId)!;
+
       const message = await _getMessageById(client, messageId, chatId);
       if (!message) {
         throw new Error("Message not Found");
@@ -242,11 +307,15 @@ messageRouter.post(
 );
 messageRouter.post(
   "/unstar/:sessionId",
+  zv("param", SessionIdSchema),
+  zv("json", MessageSchema),
   some(middleware.sessionNameValidation, middleware.sessionValidation),
   async (c) => {
     try {
-      const { messageId, chatId } = await c.req.json();
-      const client = sessions.get(c.req.param("sessionId"))!;
+      const { messageId, chatId } = c.req.valid("json");
+      const { sessionId } = c.req.valid("param");
+
+      const client = sessions.get(sessionId)!;
       const message = await _getMessageById(client, messageId, chatId);
       if (!message) {
         throw new Error("Message not Found");
